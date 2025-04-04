@@ -48,5 +48,5 @@ async def speak(interaction: discord.Interaction, message: str, channel: discord
         await interaction.response.send_message(f"✅ Sent message in {channel.mention}", ephemeral=True)
     else:
         await interaction.response.send_message(message)
-        await interaction.response.send_message(f"✅ Sent message", ephmeral=True)
+        await interaction.response.send_message(f"✅ Sent message", ephemeral=True)
 bot.run(TOKEN)
