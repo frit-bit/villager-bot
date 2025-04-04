@@ -1,35 +1,12 @@
 import os
 import discord
-import psycopg2
 from discord.ext import commands
 from discord import app_commands
 from datetime import datetime, timedelta
 
-# Get the bot token and database URL from Railway's environment variables
+# Get the bot token from Railway's environment variables
 TOKEN = os.getenv("DISCORD_TOKEN")
-DATABASE_URL = os.getenv("DATABASE_URL")
 warns = {}
-
-# Set up the database connection
-def get_db_connection():
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-    return conn
-
-# Create the table if it doesn't exist
-def create_warns_table():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS warns (
-            id SERIAL PRIMARY KEY,
-            user_id BIGINT NOT NULL,
-            reason TEXT,
-            timestamp TIMESTAMP NOT NULL
-        );
-    """)
-    conn.commit()
-    cursor.close()
-    conn.close()
 
 class Villager(commands.Bot):
     def __init__(self):
@@ -42,7 +19,6 @@ class Villager(commands.Bot):
         await self.tree.sync()
 
     async def on_ready(self):
-        create_warns_table()  # Ensure the table exists when the bot starts
         print(f'✅ {self.user} is ready and online!')
         await self.change_presence(activity=discord.Game(name="Minecraft"))
 
@@ -93,27 +69,13 @@ async def warn(interaction: discord.Interaction, user: discord.Member, reason: s
     if not any(role.name == allowed_role_name for role in interaction.user.roles):
         await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
         return
-
-    # Connect to the database
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
     user_id = user.id
-    timestamp = datetime.now()
-
-    # Insert a new warn entry for the user
-    cursor.execute(
-        "INSERT INTO warns (user_id, reason, timestamp) VALUES (%s, %s, %s)",
-        (user_id, reason, timestamp)
-    )
-
-    # Commit and close the connection
-    conn.commit()
-    cursor.close()
-    conn.close()
-
+    if user_id not in warns:
+        warns[user_id] = []
+    warns[user_id].append(datetime.now())
+    
     await interaction.response.send_message(
-        f"⚠️ {user.mention} has been warned. Reason: {reason}. ⚠️"
+        f"⚠️ {user.mention} has been warned. Reason: {reason}. They now have {len(warns[user_id])} warns. ⚠️"
     )
 
 @bot.tree.command(name="checkwarns", description="Check how many warns a user has.")
@@ -123,69 +85,49 @@ async def checkwarns(interaction: discord.Interaction, user: discord.Member):
     if not any(role.name == allowed_role_name for role in interaction.user.roles):
         await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
         return
-
-    # Connect to the database
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
     user_id = user.id
     now = datetime.now()
     one_week_ago = now - timedelta(days=7)
 
-    # Retrieve the user's warns from the database in the last 7 days
-    cursor.execute(
-        "SELECT COUNT(*) FROM warns WHERE user_id = %s AND timestamp > %s",
-        (user_id, one_week_ago)
-    )
-    count = cursor.fetchone()[0]
-
-    # Close the connection
-    cursor.close()
-    conn.close()
+    user_warns = warns.get(user_id, [])
+    recent_warns = [warn_time for warn_time in user_warns if warn_time > one_week_ago]
 
     await interaction.response.send_message(
-        f"{user.mention} has {count} warns in the last 7 days."
+        f"{user.mention} has {len(recent_warns)} warns in the last 7 days."
     )
 
 @bot.tree.command(name="removewarns", description="Remove a warning from a user.")
 @app_commands.describe(user="The user whose warn you want to remove", amount="The number of warns to remove")
 async def removewarns(interaction: discord.Interaction, user: discord.Member, amount: int):
+    user_id = user.id
+
     allowed_role_name = "Administrator"
     if not any(role.name == allowed_role_name for role in interaction.user.roles):
         await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
         return
-
-    # Connect to the database
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    user_id = user.id
-
-    # Retrieve the user's warns from the database
-    cursor.execute(
-        "SELECT id FROM warns WHERE user_id = %s ORDER BY timestamp DESC LIMIT %s",
-        (user_id, amount)
-    )
-    warn_ids = cursor.fetchall()
-
-    # If the user doesn't have enough warns
-    if len(warn_ids) == 0:
+    
+    # Check if the user has any warns
+    if user_id not in warns or len(warns[user_id]) == 0:
         await interaction.response.send_message(f"{user.mention} doesn't have any warns to remove.", ephemeral=True)
-        cursor.close()
-        conn.close()
         return
 
-    # Remove the warns from the database
-    cursor.executemany(
-        "DELETE FROM warns WHERE id = %s",
-        [(warn_id[0],) for warn_id in warn_ids]
-    )
+    # Check if the amount to remove is valid
+    if amount <= 0:
+        await interaction.response.send_message("You must specify a positive number to remove.", ephemeral=True)
+        return
 
-    # Commit and close the connection
-    conn.commit()
-    cursor.close()
-    conn.close()
+    # Check if the user has enough warns to remove
+    if len(warns[user_id]) < amount:
+        await interaction.response.send_message(f"{user.mention} only has {len(warns[user_id])} warns, can't remove {amount}.", ephemeral=True)
+        return
 
-    await interaction.response.send_message(f"✅ {amount} warns have been removed from {user.mention}.", ephemeral=True)
+    # Remove the warns by trimming the list
+    warns[user_id] = warns[user_id][:-amount]
+
+    # If the warns are reduced to 0, remove the user from the warns list
+    if len(warns[user_id]) == 0:
+        del warns[user_id]
+
+    await interaction.response.send_message(f"✅ {amount} warns have been removed from {user.mention}. They now have {len(warns.get(user_id, []))} warns.", ephemeral=True)
 
 bot.run(TOKEN)
