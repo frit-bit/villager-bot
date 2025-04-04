@@ -44,8 +44,9 @@ async def serverinfo(interaction: discord.Interaction):
 @app_commands.describe(message="The message the bot will say.", channel="(Optional) The channel to send the message in.")
 async def speak(interaction: discord.Interaction, message: str, channel: discord.TextChannel = None):
     if channel:
+        await interaction.response.defer(ephemeral=True)  # Let Discord know you're working
         await channel.send(message)
-        await interaction.response.send_message(f"✅ Sent message in {channel.mention}", ephemeral=True)
+        await interaction.followup.send(f"✅ Sent message in {channel.mention}", ephemeral=True)
     else:
         await interaction.response.send_message(message)
         await interaction.followup.send(f"✅ Sent message", ephemeral=True)
