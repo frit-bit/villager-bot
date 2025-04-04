@@ -62,6 +62,9 @@ async def speak(interaction: discord.Interaction, message: str, channel: discord
 @app_commands.describe(user="The user you want to attack", attack="The attack you want to do")
 async def fight(interaction: discord.Interaction, user: discord.Member, attack: str):
     await interaction.response.send_message(f"{user.mention}! {interaction.user.mention} has done '{attack}' to you!")
+    if user == interaction.client.user:
+        await interaction.response.send_message(f"Hrmm! *punches you*")
+        return
 
 @bot.tree.command(name="warn", description="Warn a user")
 @app_commands.describe(user="The user you want to warn", reason="The reason for the warn")
