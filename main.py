@@ -123,4 +123,4 @@ async def removewarns(interaction: discord.Interaction, user: discord.Member, am
 
     await interaction.response.send_message(f"✅ {amount} warns have been removed from {user.mention}. They now have {len(warns.get(user_id, []))} warns.", ephemeral=True)
 
-bot.run
+bot.run(TOKEN)
