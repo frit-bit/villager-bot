@@ -1,5 +1,6 @@
 import os
 import discord
+import asyncio
 from discord.ext import commands
 from discord import app_commands
 from datetime import datetime, timedelta
@@ -77,6 +78,17 @@ async def warn(interaction: discord.Interaction, user: discord.Member, reason: s
     await interaction.response.send_message(
         f"⚠️ {user.mention} has been warned. Reason: {reason}. They now have {len(warns[user_id])} warns. ⚠️"
     )
+    if len(warns[user_id]) >= 4:
+        await user.ban(reason="Too many warnings")
+        await interaction.followup.send(f"{user.mention} has been banned for 3 days.", ephemeral=True)
+
+        await asyncio.sleep(259200)
+
+        user_obj = await bot.fetch_user(user_id)
+        await interaction.guild.unban(user_obj, reason="Temp ban expired")
+    elif len(warns[user_id]) >= 5:
+        await user.ban(reason="5 warnings")
+        await interaction.followup.send(f"{user.mention} has been permanently banned.", ephemeral=True)
 
 @bot.tree.command(name="checkwarns", description="Check how many warns a user has.")
 @app_commands.describe(user="The user whose warns you are checking")
