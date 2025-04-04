@@ -86,27 +86,26 @@ async def warn(interaction: discord.Interaction, user: discord.Member, reason: s
     channel = bot.get_channel(1096981058228064468)
 
     if channel:
-        if len(warns[user_id]) >=2:
-            await user.timeout_for(timedelta(days=1))
-            await interaction.followup.send(f"{user.mention} has been timed out for 1 day (Received 2 warnings).", ephemeral=True)
+        if len(warns[user_id]) >= 5:
+            await user.ban(reason="5 warnings")
+            await interaction.followup.send(f"{user.mention} has been permanently banned (Received 5 warns).", ephemeral=True)
 
-        elif len(warns[user_id]) >=3:
-            await user.timeout_for(timedelta(days=7))
-            await interaction.followup.send(f"{user.mention} has been timed out for 1 week (Received 3 warnings).", ephemeral=True)
-    
-        elif len(warns[user_id]) >= 4:
-            await user.ban(reason="Too many warnings")
+        elif len(warns[user_id]) >=4:
+            await user.ban(reason="3 warnings")
             await interaction.followup.send(f"{user.mention} has been banned for 3 days (Received 4 warns).", ephemeral=True)
-
+            
             await asyncio.sleep(259200)
 
             user_obj = await bot.fetch_user(user_id)
             await interaction.guild.unban(user_obj, reason="Temp ban expired")
+    
+        elif len(warns[user_id]) >= 3:
+            await user.timeout_for(timedelta(days=7))
+            await interaction.followup.send(f"{user.mention} has been timed out for 7 days (Received 3 warns).", ephemeral=True)
             
-        elif len(warns[user_id]) >= 5:
-            await user.ban(reason="5 warnings")
-            await interaction.followup.send(f"{user.mention} has been permanently banned (Received 5 warns).", ephemeral=True)
-
+        elif len(warns[user_id]) >= 2:
+            await user.timeout_for(timedelta(days=1))
+            await interaction.followup.send(f"{user.mention} has been timed out for 1 day (Received 2 warns).", ephemeral=True)
 @bot.tree.command(name="checkwarns", description="Check how many warns a user has.")
 @app_commands.describe(user="The user whose warns you are checking")
 async def checkwarns(interaction: discord.Interaction, user: discord.Member):
