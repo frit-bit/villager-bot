@@ -40,4 +40,13 @@ async def serverinfo(interaction: discord.Interaction):
     embed.set_thumbnail(url=server.icon.url if server.icon else None)
     await interaction.response.send_message(embed=embed)
 
+@bot.tree.command(name="speak", description="Make the bot say something!")
+@app_commands.describe(message="The message the bot will say.", channel="(Optional) The channel to send the message in.")
+async def speak(interaction: discord.Interaction, message: str, channel: discord.TextChannel = None):
+    if channel:
+        await channel.send(message)
+        await interaction.response.send_message(f"✅ Sent message in {channel.mention}", ephemeral=True)
+    else:
+        await interaction.response.send_message(message)
+        await interaction.response.send_message(f"✅ Sent message", ephmeral=True)
 bot.run(TOKEN)
