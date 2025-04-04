@@ -4,6 +4,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from discord.ext import commands
 from discord import app_commands
+from datetime import datetime, timedelta
 import logging
 
 # Initialize logging
@@ -22,14 +23,13 @@ def save_warn(user_id, reason):
         user_data = user_ref.get()
 
         # If user exists, add to their existing warns list, otherwise create a new list
-        warn_data = {"timestamp": firestore.SERVER_TIMESTAMP, "reason": reason}
         if user_data.exists:
             user_ref.update({
-                'warns': firestore.ArrayUnion([warn_data])
+                'warns': firestore.ArrayUnion([{"timestamp": firestore.SERVER_TIMESTAMP, "reason": reason}])
             })
         else:
             user_ref.set({
-                'warns': [warn_data]
+                'warns': [{"timestamp": firestore.SERVER_TIMESTAMP, "reason": reason}]
             })
         logging.info(f"Warn saved for user {user_id}: {reason}")
     except Exception as e:
