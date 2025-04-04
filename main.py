@@ -61,9 +61,14 @@ async def speak(interaction: discord.Interaction, message: str, channel: discord
 @app_commands.describe(user="The user you want to attack", attack="The attack you want to do")
 async def fight(interaction: discord.Interaction, user: discord.Member, attack: str):
     await interaction.response.send_message(f"{user.mention}! {interaction.user.mention} has done '{attack}' to you!")
+
 @bot.tree.command(name="warn", description="Warn a user")
 @app_commands.describe(user="The user you want to warn", reason="The reason for the warn")
-async def warn(interaction: discord.Interaction, user: discord.Member, reason: str):
+async def warn(interaction: discord.Interaction, user: discord.Member, reason: str = None):
+    allowed_role_name = "Administrator"
+    if not any(role.name == allowed_role_name for role in interaction.user.roles):
+        await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
+        return
     user_id = user.id
     if user_id not in warns:
         warns[user_id] = []
@@ -72,9 +77,14 @@ async def warn(interaction: discord.Interaction, user: discord.Member, reason: s
     await interaction.response.send_message(
         f"⚠️ {user.mention} has been warned. Reason: {reason}. They now have {len(warns[user_id])} warns. ⚠️"
     )
+
 @bot.tree.command(name="checkwarns", description="Check how many warns a user has.")
 @app_commands.describe(user="The user whose warns you are checking")
 async def checkwarns(interaction: discord.Interaction, user: discord.Member):
+    allowed_role_name = "Administrator"
+    if not any(role.name == allowed_role_name for role in interaction.user.roles):
+        await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
+        return
     user_id = user.id
     now = datetime.now()
     one_week_ago = now - timedelta(days=7)
@@ -85,4 +95,39 @@ async def checkwarns(interaction: discord.Interaction, user: discord.Member):
     await interaction.response.send_message(
         f"{user.mention} has {len(recent_warns)} warns in the last 7 days."
     )
+
+@bot.tree.command(name="removewarns", description="Remove a warning from a user.")
+@app_commands.describe(user="The user whose warn you want to remove", amount="The number of warns to remove")
+async def removewarns(interaction: discord.Interaction, user: discord.Member, amount: int):
+    user_id = user.id
+
+    allowed_role_name = "Administrator"
+    if not any(role.name == allowed_role_name for role in interaction.user.roles):
+        await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
+        return
+    
+    # Check if the user has any warns
+    if user_id not in warns or len(warns[user_id]) == 0:
+        await interaction.response.send_message(f"{user.mention} doesn't have any warns to remove.", ephemeral=True)
+        return
+
+    # Check if the amount to remove is valid
+    if amount <= 0:
+        await interaction.response.send_message("You must specify a positive number to remove.", ephemeral=True)
+        return
+
+    # Check if the user has enough warns to remove
+    if len(warns[user_id]) < amount:
+        await interaction.response.send_message(f"{user.mention} only has {len(warns[user_id])} warns, can't remove {amount}.", ephemeral=True)
+        return
+
+    # Remove the warns by trimming the list
+    warns[user_id] = warns[user_id][:-amount]
+
+    # If the warns are reduced to 0, remove the user from the warns list
+    if len(warns[user_id]) == 0:
+        del warns[user_id]
+
+    await interaction.response.send_message(f"✅ {amount} warns have been removed from {user.mention}. They now have {len(warns.get(user_id, []))} warns.", ephemeral=True)
+
 bot.run(TOKEN)
