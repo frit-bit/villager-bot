@@ -1,5 +1,4 @@
 import os
-import json
 import discord
 from discord.ext import commands
 from discord import app_commands
@@ -7,16 +6,7 @@ from datetime import datetime, timedelta
 
 # Get the bot token from Railway's environment variables
 TOKEN = os.getenv("DISCORD_TOKEN")
-
-# Load warns from a file if it exists
-if os.path.exists("warns.json"):
-    with open("warns.json", "r") as f:
-        warns = json.load(f)
-        # Convert string timestamps back to datetime objects
-        for user_id in warns:
-            warns[user_id] = [datetime.fromisoformat(ts) for ts in warns[user_id]]
-else:
-    warns = {}
+warns = {}
 
 class Villager(commands.Bot):
     def __init__(self):
@@ -33,10 +23,6 @@ class Villager(commands.Bot):
         await self.change_presence(activity=discord.Game(name="Minecraft"))
 
 bot = Villager()
-
-def save_warns():
-    with open("warns.json", "w") as f:
-        json.dump({k: [t.isoformat() for t in v] for k, v in warns.items()}, f)
 
 @bot.tree.command(name="hello", description="Say hello to the villager!")
 async def hello(interaction: discord.Interaction):
@@ -64,7 +50,7 @@ async def speak(interaction: discord.Interaction, message: str, channel: discord
         await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
         return
     if channel:
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=True)  # Let Discord know you're working
         await channel.send(message)
         await interaction.followup.send(f"✅ Sent message in {channel.mention}", ephemeral=True)
     else:
@@ -83,13 +69,11 @@ async def warn(interaction: discord.Interaction, user: discord.Member, reason: s
     if not any(role.name == allowed_role_name for role in interaction.user.roles):
         await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
         return
-
-    user_id = str(user.id)
+    user_id = user.id
     if user_id not in warns:
         warns[user_id] = []
     warns[user_id].append(datetime.now())
-    save_warns()
-
+    
     await interaction.response.send_message(
         f"⚠️ {user.mention} has been warned. Reason: {reason}. They now have {len(warns[user_id])} warns. ⚠️"
     )
@@ -101,8 +85,7 @@ async def checkwarns(interaction: discord.Interaction, user: discord.Member):
     if not any(role.name == allowed_role_name for role in interaction.user.roles):
         await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
         return
-
-    user_id = str(user.id)
+    user_id = user.id
     now = datetime.now()
     one_week_ago = now - timedelta(days=7)
 
@@ -116,30 +99,34 @@ async def checkwarns(interaction: discord.Interaction, user: discord.Member):
 @bot.tree.command(name="removewarns", description="Remove a warning from a user.")
 @app_commands.describe(user="The user whose warn you want to remove", amount="The number of warns to remove")
 async def removewarns(interaction: discord.Interaction, user: discord.Member, amount: int):
+    user_id = user.id
+
     allowed_role_name = "Administrator"
     if not any(role.name == allowed_role_name for role in interaction.user.roles):
         await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
         return
-
-    user_id = str(user.id)
-
+    
+    # Check if the user has any warns
     if user_id not in warns or len(warns[user_id]) == 0:
         await interaction.response.send_message(f"{user.mention} doesn't have any warns to remove.", ephemeral=True)
         return
 
+    # Check if the amount to remove is valid
     if amount <= 0:
         await interaction.response.send_message("You must specify a positive number to remove.", ephemeral=True)
         return
 
+    # Check if the user has enough warns to remove
     if len(warns[user_id]) < amount:
         await interaction.response.send_message(f"{user.mention} only has {len(warns[user_id])} warns, can't remove {amount}.", ephemeral=True)
         return
 
+    # Remove the warns by trimming the list
     warns[user_id] = warns[user_id][:-amount]
+
+    # If the warns are reduced to 0, remove the user from the warns list
     if len(warns[user_id]) == 0:
         del warns[user_id]
-
-    save_warns()
 
     await interaction.response.send_message(f"✅ {amount} warns have been removed from {user.mention}. They now have {len(warns.get(user_id, []))} warns.", ephemeral=True)
 
