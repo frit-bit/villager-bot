@@ -43,6 +43,10 @@ async def serverinfo(interaction: discord.Interaction):
 @bot.tree.command(name="speak", description="Make the bot say something!")
 @app_commands.describe(message="The message the bot will say.", channel="(Optional) The channel to send the message in.")
 async def speak(interaction: discord.Interaction, message: str, channel: discord.TextChannel = None):
+    allowed_role_name = "Administrator"  # Change to your role name
+    if not any(role.name == allowed_role_name for role in interaction.user.roles):
+        await interaction.response.send_message("You don't have permission to use this command.", ephemeral=True)
+        return
     if channel:
         await interaction.response.defer(ephemeral=True)  # Let Discord know you're working
         await channel.send(message)
