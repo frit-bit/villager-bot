@@ -62,7 +62,7 @@ async def speak(interaction: discord.Interaction, message: str, channel: discord
 @app_commands.describe(user="The user you want to attack", attack="The attack you want to do")
 async def fight(interaction: discord.Interaction, user: discord.Member, attack: str):
     if user == interaction.client.user:
-        await interaction.response.send_message(f"Hrmm! *punches you*")
+        await interaction.response.send_message(f"😡 Hrmm! *punches you*")
         return
     else:
         await interaction.response.send_message(f"{user.mention}! {interaction.user.mention} has done '{attack}' to you!")
