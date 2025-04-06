@@ -25,6 +25,10 @@ class Villager(commands.Bot):
 
 bot = Villager()
 
+async def on_ready(interaction: discord.Interaction):
+    channel = bot.get_channel(1096981058228064468)
+    await channel.send("Bot has been deployed successfully")
+
 @bot.tree.command(name="hello", description="Say hello to the villager!")
 async def hello(interaction: discord.Interaction):
     await interaction.response.send_message(f"Hrmmm! Hello {interaction.user.mention}!")
