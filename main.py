@@ -36,14 +36,14 @@ async def ping(interaction: discord.Interaction):
 @bot.tree.command(name="serverinfo", description="Get information about the server")
 async def serverinfo(interaction: discord.Interaction):
     server = interaction.guild
-    embed = discord.Embed(title=f"{server.name} Info", color=discord.Color.green())
+    embed = discord.Embed(title=f"Info about {server.name}:", color=discord.Color.green())
     embed.add_field(name="Server Owner", value=server.owner.mention, inline=False)
     embed.add_field(name="Member Count", value=server.member_count, inline=True)
     embed.add_field(name="Created At", value=server.created_at.strftime("%B %d, %Y"), inline=True)
     embed.set_thumbnail(url=server.icon.url if server.icon else None)
     await interaction.response.send_message(embed=embed)
 
-@bot.tree.command(name="speak", description="Make the bot say something!")
+@bot.tree.command(name="speak", description="Make the bot say anything")
 @app_commands.describe(message="The message the bot will say.", channel="(Optional) The channel to send the message in.")
 async def speak(interaction: discord.Interaction, message: str, channel: discord.TextChannel = None):
     allowed_role_name = "Moderator"
