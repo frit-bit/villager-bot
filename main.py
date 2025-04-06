@@ -101,34 +101,24 @@ async def warn(interaction: discord.Interaction, user: discord.Member, reason: s
             await user.ban(reason="4 warnings")
             await interaction.followup.send(f"{user.mention} has been banned for 3 days (Received 4 warns).", ephemeral=True)
             await asyncio.sleep(259200)  # 3 days in seconds
-            user_obj = await bot.fetch_user(user_id)
-            await interaction.guild.unban(user_obj, reason="Temp ban expired")
+            try:
+                await interaction.guild.unban(user, reason="Temporary ban expired")
+            except discord.NotFound:
+                pass  # User is already unbanned
         elif len(warns[user_id]) == 3:
+            if not interaction.guild.me.guild_permissions.moderate_members:
+                await interaction.followup.send("I don't have permission to timeout members.", ephemeral=True)
+                return
             timeout_until = datetime.now() + timedelta(days=7)
-            await user.edit(timeout=timeout_until)
+            await user.edit(timed_out_until=timeout_until)
             await interaction.followup.send(f"{user.mention} has been timed out for 7 days (Received 3 warns).", ephemeral=True)
         elif len(warns[user_id]) == 2:
+            if not interaction.guild.me.guild_permissions.moderate_members:
+                await interaction.followup.send("I don't have permission to timeout members.", ephemeral=True)
+                return
             timeout_until = datetime.now() + timedelta(days=1)
-            await user.edit(timeout=timeout_until)
+            await user.edit(timed_out_until=timeout_until)
             await interaction.followup.send(f"{user.mention} has been timed out for 1 day (Received 2 warns).", ephemeral=True)
-
-@bot.tree.command(name="checkwarns", description="Check how many warns a user has.")
-@app_commands.describe(user="The user whose warns you are checking")
-async def checkwarns(interaction: discord.Interaction, user: discord.Member):
-    allowed_role_name = "Moderator"
-    if not any(role.name == allowed_role_name for role in interaction.user.roles):
-        await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
-        return
-    user_id = user.id
-    now = datetime.now()
-    one_week_ago = now - timedelta(days=7)
-
-    user_warns = warns.get(user_id, [])
-    recent_warns = [warn_time for warn_time in user_warns if warn_time > one_week_ago]
-
-    await interaction.response.send_message(
-        f"{user.mention} has {len(recent_warns)} warn(s) in the last 7 days."
-    )
 
 @bot.tree.command(name="removewarns", description="Remove a warning from a user.")
 @app_commands.describe(user="The user whose warn you want to remove", amount="The number of warns to remove")
@@ -158,5 +148,15 @@ async def removewarns(interaction: discord.Interaction, user: discord.Member, am
         del warns[user_id]
 
     await interaction.response.send_message(f"✅ {amount} warns have been removed from {user.mention}. They now have {len(warns.get(user_id, []))} warns.", ephemeral=True)
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("Nice try, but you don't have permission to use this command.")
+    elif isinstance(error, commands.CommandNotFound):
+        await ctx.send("Command not found.")
+    else:
+        await ctx.send("An error occurred.")
+        raise error
 
 bot.run(TOKEN)
