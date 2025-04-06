@@ -7,6 +7,9 @@ from datetime import datetime, timedelta
 
 # Get the bot token from Railway's environment variables
 TOKEN = os.getenv("DISCORD_TOKEN")
+if not TOKEN:
+    raise ValueError("DISCORD_TOKEN environment variable is not set.")
+
 warns = {}
 
 class Villager(commands.Bot):
@@ -20,14 +23,13 @@ class Villager(commands.Bot):
         await self.tree.sync()
 
     async def on_ready(self):
+        channel = self.get_channel(1096981058228064468)
         print(f'✅ {self.user} is ready and online!')
+        if channel:
+            await channel.send(f"{self.user.mention} has been deployed successfully")
         await self.change_presence(activity=discord.Game(name="Minecraft"))
 
 bot = Villager()
-
-async def on_ready(interaction: discord.Interaction):
-    channel = bot.get_channel(1096981058228064468)
-    await channel.send("Bot has been deployed successfully")
 
 @bot.tree.command(name="hello", description="Say hello to the villager!")
 async def hello(interaction: discord.Interaction):
@@ -60,14 +62,16 @@ async def speak(interaction: discord.Interaction, message: str, channel: discord
         await interaction.followup.send(f"✅ Sent message in {channel.mention}", ephemeral=True)
     else:
         await interaction.response.send_message(message)
-        await interaction.followup.send(f"✅ Sent message", ephemeral=True)
 
 @bot.tree.command(name="fight", description="Fight people using different moves (just for fun)")
 @app_commands.describe(user="The user you want to attack", attack="The attack you want to do")
 async def fight(interaction: discord.Interaction, user: discord.Member, attack: str):
+    allowed_attacks = ["punch", "kick", "slap", "headbutt"]
+    if attack.lower() not in allowed_attacks:
+        await interaction.response.send_message(f"Invalid attack. Allowed attacks are: {', '.join(allowed_attacks)}.")
+        return
     if user == interaction.client.user:
         await interaction.response.send_message(f"😡 Hrmm! *punches you*")
-        return
     else:
         await interaction.response.send_message(f"{user.mention}! {interaction.user.mention} has done '{attack}' to you!")
 
@@ -90,25 +94,22 @@ async def warn(interaction: discord.Interaction, user: discord.Member, reason: s
     channel = bot.get_channel(1096981058228064468)
 
     if channel:
-        if len(warns[user_id]) >= 5:
+        if len(warns[user_id]) == 5:
             await user.ban(reason="5 warnings")
             await interaction.followup.send(f"{user.mention} has been permanently banned (Received 5 warns).", ephemeral=True)
-
-        elif len(warns[user_id]) >= 4:
-            await user.ban(reason="3 warnings")
+        elif len(warns[user_id]) == 4:
+            await user.ban(reason="4 warnings")
             await interaction.followup.send(f"{user.mention} has been banned for 3 days (Received 4 warns).", ephemeral=True)
-            
-            await asyncio.sleep(259200)
-
+            await asyncio.sleep(259200)  # 3 days in seconds
             user_obj = await bot.fetch_user(user_id)
             await interaction.guild.unban(user_obj, reason="Temp ban expired")
-    
-        elif len(warns[user_id]) >= 3:
-            await user.timeout_for(timedelta(days=7))
+        elif len(warns[user_id]) == 3:
+            timeout_until = datetime.now() + timedelta(days=7)
+            await user.edit(timeout=timeout_until)
             await interaction.followup.send(f"{user.mention} has been timed out for 7 days (Received 3 warns).", ephemeral=True)
-            
-        elif len(warns[user_id]) >= 2:
-            await user.timeout_for(timedelta(days=1))
+        elif len(warns[user_id]) == 2:
+            timeout_until = datetime.now() + timedelta(days=1)
+            await user.edit(timeout=timeout_until)
             await interaction.followup.send(f"{user.mention} has been timed out for 1 day (Received 2 warns).", ephemeral=True)
 
 @bot.tree.command(name="checkwarns", description="Check how many warns a user has.")
@@ -139,25 +140,20 @@ async def removewarns(interaction: discord.Interaction, user: discord.Member, am
         await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
         return
     
-    # Check if the user has any warns
     if user_id not in warns or len(warns[user_id]) == 0:
         await interaction.response.send_message(f"{user.mention} doesn't have any warns to remove.", ephemeral=True)
         return
 
-    # Check if the amount to remove is valid
     if amount <= 0:
         await interaction.response.send_message("You must specify a positive number to remove.", ephemeral=True)
         return
 
-    # Check if the user has enough warns to remove
     if len(warns[user_id]) < amount:
         await interaction.response.send_message(f"{user.mention} only has {len(warns[user_id])} warns, can't remove {amount}.", ephemeral=True)
         return
 
-    # Remove the warns by trimming the list
     warns[user_id] = warns[user_id][:-amount]
 
-    # If the warns are reduced to 0, remove the user from the warns list
     if len(warns[user_id]) == 0:
         del warns[user_id]
 
