@@ -19,12 +19,8 @@ def load_warns():
     return {}
 
 def save_warns():
-    try:
-        with open("warns.json", "w") as f:
-            json.dump(warns, f, indent=4)
-        print("Warns saved successfully.")
-    except Exception as e:
-        print(f"Error saving warns: {e}")
+    with open("warns.json", "w") as f:
+        json.dump(warns, f, indent=4)
 
 warns = load_warns()
 
@@ -47,12 +43,49 @@ class Villager(commands.Bot):
 
 bot = Villager()
 
-# Other commands omitted for brevity...
+@bot.tree.command(name="hello", description="Say hello to the villager!")
+async def hello(interaction: discord.Interaction):
+    await interaction.response.send_message(f"Hrmmm! Hello {interaction.user.mention}!")
+
+@bot.tree.command(name="ping", description="Check bot's latency")
+async def ping(interaction: discord.Interaction):
+    await interaction.response.send_message(f"Pong! Latency: {round(bot.latency * 1000)}ms")
+
+@bot.tree.command(name="serverinfo", description="Get information about the server")
+async def serverinfo(interaction: discord.Interaction):
+    server = interaction.guild
+    embed = discord.Embed(title=f"Info about {server.name}:", color=discord.Color.green())
+    embed.add_field(name="Server Owner", value=server.owner.mention, inline=False)
+    embed.add_field(name="Member Count", value=server.member_count, inline=True)
+    embed.add_field(name="Created At", value=server.created_at.strftime("%B %d, %Y"), inline=True)
+    embed.set_thumbnail(url=server.icon.url if server.icon else None)
+    await interaction.response.send_message(embed=embed)
+
+@bot.tree.command(name="speak", description="Make the bot say anything")
+@app_commands.describe(message="The message the bot will say.", channel="(Optional) The channel to send the message in.")
+async def speak(interaction: discord.Interaction, message: str, channel: discord.TextChannel = None):
+    allowed_role_name = "Moderator"
+    if not any(role.name == allowed_role_name for role in interaction.user.roles):
+        await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
+        return
+    if channel:
+        await interaction.response.defer(ephemeral=True)  # Let Discord know you're working
+        await channel.send(message)
+        await interaction.followup.send(f"✅ Sent message in {channel.mention}", ephemeral=True)
+    else:
+        await interaction.response.send_message(message)
+
+@bot.tree.command(name="fight", description="Fight people using different moves (just for fun)")
+@app_commands.describe(user="The user you want to attack", attack="The attack you want to do")
+async def fight(interaction: discord.Interaction, user: Member, attack: str):
+    if user == interaction.client.user:
+        await interaction.response.send_message(f"😡 Hrmm! *punches you*")
+    else:
+        await interaction.response.send_message(f"{user.mention}! {interaction.user.mention} has done '{attack}' to you!")
 
 @bot.tree.command(name="warn", description="Warn a user")
 @app_commands.describe(user="The user you want to warn", reason="The reason for the warn")
 async def warn(interaction: discord.Interaction, user: Member, reason: str = None):
-    global warns
     allowed_role_name = "Moderator"
     if not any(role.name == allowed_role_name for role in interaction.user.roles):
         await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
@@ -62,8 +95,8 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
     if user_id not in warns:
         warns[user_id] = []
     warns[user_id].append(datetime.now().isoformat())
-    save_warns()  # Make sure to save after modifying the warns
-
+    save_warns()
+    
     await interaction.response.send_message(
         f"⚠️ {user.mention} has been warned. Reason: {reason}. They now have {len(warns[user_id])} warn(s). ⚠️"
     )
@@ -77,20 +110,18 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
             if warnings == 2:
                 time_delta = timedelta(days=1)
             elif warnings == 3:
-                time_delta = timedelta(days=3)
-            elif warnings == 4:
                 time_delta = timedelta(days=7)
-            await user.timeout(time_delta, reason=f"Received {warnings} warnings.")
+            elif warnings == 4:
+                time_delta = timedelta(days=3)
+            await user.timeout(time_delta, reason=f"Received {warns} warnings.")
             await channel.send(f"{user.mention} has been timed out for {time_delta} days.")
         if warnings == 5:
-            await user.ban(reason=f"Received {warnings} warns.")
+            await user.ban(reason=f"Received {warns} warns.")
 
 @bot.tree.command(name="removewarns", description="Remove a warning from a user.")
 @app_commands.describe(user="The user whose warn you want to remove", amount="The number of warns to remove")
 async def removewarns(interaction: discord.Interaction, user: Member, amount: int):
-    global warns
-
-    user_id = str(user.id)
+    user_id = user.id
 
     allowed_role_name = "Moderator"
     if not any(role.name == allowed_role_name for role in interaction.user.roles):
@@ -113,8 +144,6 @@ async def removewarns(interaction: discord.Interaction, user: Member, amount: in
 
     if len(warns[user_id]) == 0:
         del warns[user_id]
-
-    save_warns()  # Make sure to save after modifying the warns
 
     await interaction.response.send_message(f"✅ {amount} warns have been removed from {user.mention}. They now have {len(warns.get(user_id, []))} warns.", ephemeral=True)
 
