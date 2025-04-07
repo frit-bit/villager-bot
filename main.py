@@ -19,8 +19,11 @@ def load_warns():
     return {}
 
 def save_warns():
-    with open("warns.json", "w") as f:
-        json.dump(warns, f, indent=4)
+    try:
+        with open("warns.json", "w") as f:
+            json.dump(warns, f, indent=4)
+    except Exception as e:
+        print(f"Error saving warns: {e}")
 
 warns = load_warns()
 
@@ -48,6 +51,7 @@ bot = Villager()
 @bot.tree.command(name="warn", description="Warn a user")
 @app_commands.describe(user="The user you want to warn", reason="The reason for the warn")
 async def warn(interaction: discord.Interaction, user: Member, reason: str = None):
+    global warns
     allowed_role_name = "Moderator"
     if not any(role.name == allowed_role_name for role in interaction.user.roles):
         await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
@@ -83,6 +87,8 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
 @bot.tree.command(name="removewarns", description="Remove a warning from a user.")
 @app_commands.describe(user="The user whose warn you want to remove", amount="The number of warns to remove")
 async def removewarns(interaction: discord.Interaction, user: Member, amount: int):
+    global warns
+
     user_id = str(user.id)
 
     allowed_role_name = "Moderator"
