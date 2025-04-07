@@ -1,16 +1,28 @@
 import os
 import discord
 import asyncio
+import json
 from discord.ext import commands
 from discord import app_commands
 from datetime import datetime, timedelta
+from discord import Member
 
 # Get the bot token from Railway's environment variables
 TOKEN = os.getenv("DISCORD_TOKEN")
 if not TOKEN:
     raise ValueError("DISCORD_TOKEN environment variable is not set.")
 
-warns = {}
+def load_warns():
+    if os.path.exists("warns.json"):
+        with open("warns.json", "r") as f:
+            return json.load(f)
+    return {}
+
+def save_warns():
+    with open("warns.json", "w") as f:
+        json.dump(warns, f, indent=4)
+
+warns = load_warns()
 
 class Villager(commands.Bot):
     def __init__(self):
@@ -65,11 +77,7 @@ async def speak(interaction: discord.Interaction, message: str, channel: discord
 
 @bot.tree.command(name="fight", description="Fight people using different moves (just for fun)")
 @app_commands.describe(user="The user you want to attack", attack="The attack you want to do")
-async def fight(interaction: discord.Interaction, user: discord.Member, attack: str):
-    allowed_attacks = ["punch", "kick", "slap", "headbutt"]
-    if attack.lower() not in allowed_attacks:
-        await interaction.response.send_message(f"Invalid attack. Allowed attacks are: {', '.join(allowed_attacks)}.")
-        return
+async def fight(interaction: discord.Interaction, user: Member, attack: str):
     if user == interaction.client.user:
         await interaction.response.send_message(f"😡 Hrmm! *punches you*")
     else:
@@ -77,52 +85,42 @@ async def fight(interaction: discord.Interaction, user: discord.Member, attack: 
 
 @bot.tree.command(name="warn", description="Warn a user")
 @app_commands.describe(user="The user you want to warn", reason="The reason for the warn")
-async def warn(interaction: discord.Interaction, user: discord.Member, reason: str = None):
+async def warn(interaction: discord.Interaction, user: Member, reason: str = None):
     allowed_role_name = "Moderator"
     if not any(role.name == allowed_role_name for role in interaction.user.roles):
         await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
         return
-    user_id = user.id
+    
+    user_id = str(user.id)
     if user_id not in warns:
         warns[user_id] = []
-    warns[user_id].append(datetime.now())
+    warns[user_id].append(datetime.now().isoformat())
+    save_warns()
     
     await interaction.response.send_message(
         f"⚠️ {user.mention} has been warned. Reason: {reason}. They now have {len(warns[user_id])} warn(s). ⚠️"
     )
 
-    channel = bot.get_channel(1096981058228064468)
+    warnings = len(warns.get(user_id, []))
+
+    channel = bot.get_channel(1358592562620796981)
 
     if channel:
-        if len(warns[user_id]) == 5:
-            await user.ban(reason="5 warnings")
-            await interaction.followup.send(f"{user.mention} has been permanently banned (Received 5 warns).", ephemeral=True)
-        elif len(warns[user_id]) == 4:
-            await user.ban(reason="4 warnings")
-            await interaction.followup.send(f"{user.mention} has been banned for 3 days (Received 4 warns).", ephemeral=True)
-            await asyncio.sleep(259200)  # 3 days in seconds
-            try:
-                await interaction.guild.unban(user, reason="Temporary ban expired")
-            except discord.NotFound:
-                pass  # User is already unbanned
-        elif len(warns[user_id]) == 3:
-            if not interaction.guild.me.guild_permissions.moderate_members:
-                await interaction.followup.send("I don't have permission to timeout members.", ephemeral=True)
-                return
-            timeout_until = datetime.now() + timedelta(days=7)
-            await user.edit(timed_out_until=timeout_until)
-            await interaction.followup.send(f"{user.mention} has been timed out for 7 days (Received 3 warns).", ephemeral=True)
-        elif len(warns[user_id]) == 2:
-            if not interaction.guild.me.guild_permissions.moderate_members:
-                await interaction.followup.send("I don't have permission to timeout members.", ephemeral=True)
-                return
-            timeout_until = datetime.now() + timedelta(days=1)
-            await user.edit(timed_out_until=timeout_until)
-            await interaction.followup.send(f"{user.mention} has been timed out for 1 day (Received 2 warns).", ephemeral=True)
+        if 1 < warnings <= 4:
+            if warnings == 2:
+                time_delta = timedelta(days=1)
+            elif warnings == 3:
+                time_delta = timedelta(days=7)
+            elif warnings == 4:
+                time_delta = timedelta(days=3)
+            await user.timeout(time_delta, reason=f"Received {warns} warnings.")
+            await channel.send(f"{user.mention} has been timed out for {time_delta} days.")
+        if warnings == 5:
+            await user.ban(reason=f"Received {warns} warns.")
 
 @bot.tree.command(name="removewarns", description="Remove a warning from a user.")
 @app_commands.describe(user="The user whose warn you want to remove", amount="The number of warns to remove")
-async def removewarns(interaction: discord.Interaction, user: discord.Member, amount: int):
+async def removewarns(interaction: discord.Interaction, user: Member, amount: int):
     user_id = user.id
 
     allowed_role_name = "Moderator"
