@@ -72,9 +72,9 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
             if warnings == 2:
                 time_delta = timedelta(days=1)
             elif warnings == 3:
-                time_delta = timedelta(days=7)
-            elif warnings == 4:
                 time_delta = timedelta(days=3)
+            elif warnings == 4:
+                time_delta = timedelta(days=7)
             await user.timeout(time_delta, reason=f"Received {warnings} warnings.")
             await channel.send(f"{user.mention} has been timed out for {time_delta} days.")
         if warnings == 5:
