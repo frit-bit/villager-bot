@@ -22,6 +22,7 @@ def save_warns():
     try:
         with open("warns.json", "w") as f:
             json.dump(warns, f, indent=4)
+        print("Warns saved successfully.")
     except Exception as e:
         print(f"Error saving warns: {e}")
 
