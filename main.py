@@ -104,7 +104,7 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
         "guild_id": guild_id,
         "user_id": user_id,
         "reason": reason if reason else "",
-        "timestamp": datetime.now(pytz.UTC)  # Use UTC time explicitly
+        "timestamp": datetime.now(pytz.UTC).isoformat()
     }
 
     try:
