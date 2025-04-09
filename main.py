@@ -1,7 +1,6 @@
 import os
 import discord
 import asyncio
-import json
 from discord.ext import commands
 from discord import app_commands
 from datetime import datetime, timedelta
@@ -12,17 +11,8 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 if not TOKEN:
     raise ValueError("DISCORD_TOKEN environment variable is not set.")
 
-def load_warns():
-    if os.path.exists("warns.json"):
-        with open("warns.json", "r") as f:
-            return json.load(f)
-    return {}
-
-def save_warns():
-    with open("warns.json", "w") as f:
-        json.dump(warns, f, indent=4)
-
-warns = load_warns()
+# Initialize an empty dictionary to store warnings in memory
+warns = {}
 
 class Villager(commands.Bot):
     def __init__(self):
@@ -96,7 +86,6 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
     if user_id not in warns:
         warns[user_id] = []
     warns[user_id].append(datetime.now().isoformat())
-    save_warns()
     
     await interaction.response.send_message(
         f"⚠️ {user.mention} has been warned. Reason: {reason}. They now have {len(warns[user_id])} warn(s). ⚠️"
@@ -114,10 +103,10 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
                 time_delta = timedelta(days=7)
             elif warnings == 4:
                 time_delta = timedelta(days=3)
-            await user.timeout(time_delta, reason=f"Received {warns} warnings.")
+            await user.timeout(time_delta, reason=f"Received {warnings} warnings.")
             await channel.send(f"{user.mention} has been timed out for {time_delta} days.")
         if warnings == 5:
-            await user.ban(reason=f"Received {warns} warns.")
+            await user.ban(reason=f"Received {warnings} warns.")
 
 @bot.tree.command(name="removewarns", description="Remove a warning from a user.")
 @app_commands.describe(user="The user whose warn you want to remove", amount="The number of warns to remove")
@@ -147,6 +136,18 @@ async def removewarns(interaction: discord.Interaction, user: Member, amount: in
         del warns[user_id]
 
     await interaction.response.send_message(f"✅ {amount} warns have been removed from {user.mention}. They now have {len(warns.get(user_id, []))} warns.", ephemeral=True)
+
+@bot.tree.command(name="checkwarns", description="Check how many warnings a user has.")
+@app_commands.describe(user="The user whose warnings you want to check")
+async def checkwarns(interaction: discord.Interaction, user: Member):
+    user_id = str(user.id)
+    
+    if user_id not in warns or len(warns[user_id]) == 0:
+        await interaction.response.send_message(f"{user.mention} has no warnings.", ephemeral=True)
+        return
+    
+    warnings = len(warns[user_id])
+    await interaction.response.send_message(f"{user.mention} has {warnings} warning(s).", ephemeral=True)
 
 @bot.event
 async def on_command_error(ctx, error):
