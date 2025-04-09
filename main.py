@@ -1,13 +1,12 @@
 import os
 import discord
+import pytz
 import asyncio
 import logging
 logging.basicConfig(level=logging.DEBUG)
 from discord.ext import commands
 from discord import app_commands, Member
 from datetime import datetime, timedelta
-
-
 # Supabase setup
 from supabase import create_client, Client
 
@@ -17,6 +16,15 @@ if not SUPABASE_URL or not SUPABASE_KEY:
     raise ValueError("Supabase environment variables (SUPABASE_URL and SUPABASE_KEY) must be set.")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+warn_data = {
+    "guild_id": guild_id,
+    "user_id": user_id,
+    "reason": reason if reason else "",
+    "timestamp": datetime.now(pytz.UTC)  # Use UTC time explicitly
+}
+
+insert_result = await asyncio.to_thread(lambda: supabase.table("warns").insert(warn_data).execute())
 
 # Get the bot token from Railway's environment variables
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -86,6 +94,7 @@ async def fight(interaction: discord.Interaction, user: Member, attack: str):
     else:
         await interaction.response.send_message(f"{user.mention}! {interaction.user.mention} has done '{attack}' to you!")
 
+# Correcting placement of variables and functions
 @bot.tree.command(name="warn", description="Warn a user")
 @app_commands.describe(user="The user you want to warn", reason="The reason for the warn")
 async def warn(interaction: discord.Interaction, user: Member, reason: str = None):
@@ -107,14 +116,11 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
 
     try:
         # INSERT warn
-        insert_result = await asyncio.to_thread(lambda: supabase.table("warns").insert(warn_data).execute())
+        insert_result = await supabase.table("warns").insert(warn_data).execute()
         print(f"[DEBUG] Insert result: {insert_result}")
 
         # GET total warns
-        result = await asyncio.to_thread(lambda: supabase.table("warns")
-                                         .select("*")
-                                         .match({"guild_id": guild_id, "user_id": user_id})
-                                         .execute())
+        result = await supabase.table("warns").select("*").match({"guild_id": guild_id, "user_id": user_id}).execute()
         data = result.data if result and result.data else []
         warnings = len(data)
 
@@ -138,6 +144,7 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
         await interaction.response.send_message(
             f"❌ An error occurred while issuing the warning. Check logs.", ephemeral=True
         )
+
 
 @bot.tree.command(name="checkwarns", description="Check how many warnings a user has")
 @app_commands.describe(user="The user to check")
