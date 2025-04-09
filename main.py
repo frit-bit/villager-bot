@@ -70,11 +70,11 @@ async def speak(interaction: discord.Interaction, message: str, channel: discord
         return
     if channel:
         await interaction.response.defer(ephemeral=True)  # Let Discord know you're working
-        await interaction.response.send_messsage(f"✅ Sent message in {channel.mention}", ephemeral=True)
         await channel.send(message)
-
+        await interaction.followup.send(f"✅ Sent message in {channel.mention}", ephemeral=True)
     else:
-        await interaction.response.send_message(message)
+        await interaction.response.send_message("✅ Sent message", ephemeral=True)
+        await interaction.channel.send(message)
 
 @bot.tree.command(name="fight", description="Fight people using different moves (just for fun)")
 @app_commands.describe(user="The user you want to attack", attack="The attack you want to do")
