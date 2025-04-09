@@ -100,11 +100,14 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
     guild_id = str(interaction.guild.id)
     user_id = str(user.id)
     
+    # Fix: Removing microseconds from datetime to ensure compatibility
+    timestamp = datetime.now(pytz.UTC).replace(microsecond=0).isoformat()
+
     warn_data = {
         "guild_id": guild_id,
         "user_id": user_id,
         "reason": reason if reason else "",
-        "timestamp": datetime.now(pytz.UTC).isoformat()
+        "timestamp": timestamp
     }
 
     try:
@@ -137,6 +140,7 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
         await interaction.response.send_message(
             f"❌ An error occurred while issuing the warning. Check logs.", ephemeral=True
         )
+
 
 @bot.tree.command(name="checkwarns", description="Check how many warnings a user has")
 @app_commands.describe(user="The user to check")
