@@ -1,27 +1,28 @@
 import os
 import discord
-import pytz
 import asyncio
-import logging
+import json
 from discord.ext import commands
-from discord import app_commands, Member
+from discord import app_commands
 from datetime import datetime, timedelta
-from supabase import create_client, Client
-
-logging.basicConfig(level=logging.DEBUG)
-
-# Supabase setup
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-if not SUPABASE_URL or not SUPABASE_KEY:
-    raise ValueError("Supabase environment variables (SUPABASE_URL and SUPABASE_KEY) must be set.")
-
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+from discord import Member
 
 # Get the bot token from Railway's environment variables
 TOKEN = os.getenv("DISCORD_TOKEN")
 if not TOKEN:
     raise ValueError("DISCORD_TOKEN environment variable is not set.")
+
+def load_warns():
+    if os.path.exists("warns.json"):
+        with open("warns.json", "r") as f:
+            return json.load(f)
+    return {}
+
+def save_warns():
+    with open("warns.json", "w") as f:
+        json.dump(warns, f, indent=4)
+
+warns = load_warns()
 
 class Villager(commands.Bot):
     def __init__(self):
@@ -65,13 +66,10 @@ async def serverinfo(interaction: discord.Interaction):
 async def speak(interaction: discord.Interaction, message: str, channel: discord.TextChannel = None):
     allowed_role_name = "Moderator"
     if not any(role.name == allowed_role_name for role in interaction.user.roles):
-        await interaction.response.send_message(
-            f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
-            ephemeral=True
-        )
+        await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
         return
     if channel:
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=True)  # Let Discord know you're working
         await channel.send(message)
         await interaction.followup.send(f"✅ Sent message in {channel.mention}", ephemeral=True)
     else:
@@ -82,7 +80,7 @@ async def speak(interaction: discord.Interaction, message: str, channel: discord
 @app_commands.describe(user="The user you want to attack", attack="The attack you want to do")
 async def fight(interaction: discord.Interaction, user: Member, attack: str):
     if user == interaction.client.user:
-        await interaction.response.send_message("😡 Hrmm! *punches you*")
+        await interaction.response.send_message(f"😡 Hrmm! *punches you*")
     else:
         await interaction.response.send_message(f"{user.mention}! {interaction.user.mention} has done '{attack}' to you!")
 
@@ -91,106 +89,47 @@ async def fight(interaction: discord.Interaction, user: Member, attack: str):
 async def warn(interaction: discord.Interaction, user: Member, reason: str = None):
     allowed_role_name = "Moderator"
     if not any(role.name == allowed_role_name for role in interaction.user.roles):
-        await interaction.response.send_message(
-            f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
-            ephemeral=True
-        )
+        await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
         return
-
-    guild_id = str(interaction.guild.id)
-    user_id = str(user.id)
     
-    # Fix: Removing microseconds from datetime to ensure compatibility
-    timestamp = datetime.now(pytz.UTC).replace(microsecond=0).isoformat()
-
-    warn_data = {
-        "guild_id": guild_id,
-        "user_id": user_id,
-        "reason": reason if reason else "",
-        "timestamp": timestamp
-    }
-
-    try:
-        # INSERT warn
-        insert_result = await asyncio.to_thread(lambda: supabase.table("warns").insert(warn_data).execute())
-        print(f"[DEBUG] Insert result: {insert_result}")
-
-        # GET total warns
-        result = await supabase.table("warns").select("*").match({"guild_id": guild_id, "user_id": user_id}).execute()
-        data = result.data if result and result.data else []
-        warnings = len(data)
-
-        # RESPOND
-        await interaction.response.send_message(
-            f"⚠️ {user.mention} has been warned. Reason: {reason}. They now have {warnings} warn(s). ⚠️"
-        )
-
-        # OPTIONAL timeout/ban logic
-        channel = bot.get_channel(1358592562620796981)
-        if channel:
-            if 1 < warnings <= 4:
-                time_delta = timedelta(days=1 if warnings == 2 else 7 if warnings == 3 else 3)
-                await user.timeout(time_delta, reason=f"Received {warnings} warnings.")
-                await channel.send(f"{user.mention} has been timed out for {time_delta.days} day(s).")
-            if warnings == 5:
-                await user.ban(reason=f"Received {warnings} warns.")
-
-    except Exception as e:
-        print(f"[ERROR] Supabase insert failed: {e}")
-        await interaction.response.send_message(
-            f"❌ An error occurred while issuing the warning. Check logs.", ephemeral=True
-        )
-
-
-@bot.tree.command(name="checkwarns", description="Check how many warnings a user has")
-@app_commands.describe(user="The user to check")
-async def checkwarns(interaction: discord.Interaction, user: Member):
-    guild_id = str(interaction.guild.id)
     user_id = str(user.id)
-    result = await asyncio.to_thread(lambda: supabase.table("warns")
-                                     .select("*")
-                                     .match({"guild_id": guild_id, "user_id": user_id})
-                                     .execute())
-    data = result.data if result and result.data else []
-    if not data:
-        await interaction.response.send_message(f"✅ {user.mention} has no warnings.", ephemeral=True)
-        return
-
-    warning_count = len(data)
-    timestamps = "\n".join(
-        [f"- {datetime.fromisoformat(item['timestamp']).strftime('%Y-%m-%d %H:%M:%S')}" for item in data if item.get("timestamp")]
+    if user_id not in warns:
+        warns[user_id] = []
+    warns[user_id].append(datetime.now().isoformat())
+    save_warns()
+    
+    await interaction.response.send_message(
+        f"⚠️ {user.mention} has been warned. Reason: {reason}. They now have {len(warns[user_id])} warn(s). ⚠️"
     )
 
-    embed = discord.Embed(
-        title=f"⚠️ Warnings for {user}",
-        description=f"**Total:** {warning_count} warning(s)",
-        color=discord.Color.orange()
-    )
-    embed.add_field(name="Timestamps", value=timestamps or "N/A", inline=False)
+    warnings = len(warns.get(user_id, []))
 
-    await interaction.response.send_message(embed=embed, ephemeral=True)
+    channel = bot.get_channel(1358592562620796981)
+
+    if channel:
+        if 1 < warnings <= 4:
+            if warnings == 2:
+                time_delta = timedelta(days=1)
+            elif warnings == 3:
+                time_delta = timedelta(days=7)
+            elif warnings == 4:
+                time_delta = timedelta(days=3)
+            await user.timeout(time_delta, reason=f"Received {warns} warnings.")
+            await channel.send(f"{user.mention} has been timed out for {time_delta} days.")
+        if warnings == 5:
+            await user.ban(reason=f"Received {warns} warns.")
 
 @bot.tree.command(name="removewarns", description="Remove a warning from a user.")
 @app_commands.describe(user="The user whose warn you want to remove", amount="The number of warns to remove")
 async def removewarns(interaction: discord.Interaction, user: Member, amount: int):
+    user_id = user.id
+
     allowed_role_name = "Moderator"
     if not any(role.name == allowed_role_name for role in interaction.user.roles):
-        await interaction.response.send_message(
-            f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
-            ephemeral=True
-        )
+        await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
         return
-
-    guild_id = str(interaction.guild.id)
-    user_id = str(user.id)
-    # Get existing warns ordered by timestamp ascending
-    result = await asyncio.to_thread(lambda: supabase.table("warns")
-                                     .select("id")
-                                     .match({"guild_id": guild_id, "user_id": user_id})
-                                     .order("timestamp", ascending=True)
-                                     .execute())
-    data = result.data if result and result.data else []
-    if not data:
+    
+    if user_id not in warns or len(warns[user_id]) == 0:
         await interaction.response.send_message(f"{user.mention} doesn't have any warns to remove.", ephemeral=True)
         return
 
@@ -198,30 +137,16 @@ async def removewarns(interaction: discord.Interaction, user: Member, amount: in
         await interaction.response.send_message("You must specify a positive number to remove.", ephemeral=True)
         return
 
-    if len(data) < amount:
-        await interaction.response.send_message(
-            f"{user.mention} only has {len(data)} warns, can't remove {amount}.", ephemeral=True
-        )
+    if len(warns[user_id]) < amount:
+        await interaction.response.send_message(f"{user.mention} only has {len(warns[user_id])} warns, can't remove {amount}.", ephemeral=True)
         return
 
-    # Remove the oldest warnings first
-    warns_to_remove = data[:amount]
-    for warn_entry in warns_to_remove:
-        warn_id = warn_entry["id"]
-        await asyncio.to_thread(lambda: supabase.table("warns").delete().match({"id": warn_id}).execute())
+    warns[user_id] = warns[user_id][:-amount]
 
-    # Query updated warns count
-    result_after = await asyncio.to_thread(lambda: supabase.table("warns")
-                                           .select("*")
-                                           .match({"guild_id": guild_id, "user_id": user_id})
-                                           .execute())
-    data_after = result_after.data if result_after and result_after.data else []
-    updated_count = len(data_after)
+    if len(warns[user_id]) == 0:
+        del warns[user_id]
 
-    await interaction.response.send_message(
-        f"✅ {amount} warns have been removed from {user.mention}. They now have {updated_count} warns.",
-        ephemeral=True
-    )
+    await interaction.response.send_message(f"✅ {amount} warns have been removed from {user.mention}. They now have {len(warns.get(user_id, []))} warns.", ephemeral=True)
 
 @bot.event
 async def on_command_error(ctx, error):
