@@ -120,6 +120,27 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
         if warnings == 5:
             await user.ban(reason=f"Received {warnings} warns.")
 
+@bot.tree.command(name="checkwarns", description="Check how many warnings a user has")
+@app_commands.describe(user="The user to check")
+async def checkwarns(interaction: discord.Interaction, user: Member):
+    user_id = str(user.id)
+
+    if user_id not in warns or len(warns[user_id]) == 0:
+        await interaction.response.send_message(f"✅ {user.mention} has no warnings.", ephemeral=True)
+        return
+
+    warning_count = len(warns[user_id])
+    timestamps = "\n".join([f"- {datetime.fromisoformat(t).strftime('%Y-%m-%d %H:%M:%S')}" for t in warns[user_id]])
+
+    embed = discord.Embed(
+        title=f"⚠️ Warnings for {user}",
+        description=f"**Total:** {warning_count} warning(s)",
+        color=discord.Color.orange()
+    )
+    embed.add_field(name="Timestamps", value=timestamps, inline=False)
+
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
 @bot.tree.command(name="removewarns", description="Remove a warning from a user.")
 @app_commands.describe(user="The user whose warn you want to remove", amount="The number of warns to remove")
 async def removewarns(interaction: discord.Interaction, user: Member, amount: int):
