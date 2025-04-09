@@ -1,9 +1,12 @@
 import os
 import discord
 import asyncio
+import logging
+logging.basicConfig(level=logging.DEBUG)
 from discord.ext import commands
 from discord import app_commands, Member
 from datetime import datetime, timedelta
+
 
 # Supabase setup
 from supabase import create_client, Client
