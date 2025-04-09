@@ -82,7 +82,7 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
         await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
         return
     
-    user_id = str(user.id)
+    user_id = user.id
     if user_id not in warns:
         warns[user_id] = []
     warns[user_id].append(datetime.now().isoformat())
