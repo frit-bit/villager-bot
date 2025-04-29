@@ -1,4 +1,1 @@
-discord
-supabase
-pytz
-asyncio
+discord.py
