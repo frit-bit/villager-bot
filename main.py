@@ -11,7 +11,7 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 if not TOKEN:
     raise ValueError("DISCORD_TOKEN environment variable is not set.")
 
-# Initialize an empty dictionary to store warnings in memory
+# In-memory warning storage
 warns = {}
 
 class Villager(commands.Bot):
@@ -59,7 +59,7 @@ async def speak(interaction: discord.Interaction, message: str, channel: discord
         await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
         return
     if channel:
-        await interaction.response.defer(ephemeral=True)  # Let Discord know you're working
+        await interaction.response.defer(ephemeral=True)
         await channel.send(message)
         await interaction.followup.send(f"✅ Sent message in {channel.mention}", ephemeral=True)
     else:
@@ -70,7 +70,7 @@ async def speak(interaction: discord.Interaction, message: str, channel: discord
 @app_commands.describe(user="The user you want to attack", attack="The attack you want to do")
 async def fight(interaction: discord.Interaction, user: Member, attack: str):
     if user == interaction.client.user:
-        await interaction.response.send_message(f"😡 Hrmm! *punches you*")
+        await interaction.response.send_message("😡 Hrmm! *punches you*")
     else:
         await interaction.response.send_message(f"{user.mention}! {interaction.user.mention} has done '{attack}' to you!")
 
@@ -92,7 +92,6 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
     )
 
     warnings = len(warns.get(user_id, []))
-
     channel = bot.get_channel(1358592562620796981)
 
     if channel:
@@ -104,7 +103,7 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
             elif warnings == 4:
                 time_delta = timedelta(days=3)
             await user.timeout(time_delta, reason=f"Received {warnings} warnings.")
-            await channel.send(f"{user.mention} has been timed out for {time_delta} days.")
+            await channel.send(f"{user.mention} has been timed out for {time_delta.days} day(s).")
         if warnings == 5:
             await user.ban(reason=f"Received {warnings} warns.")
 
@@ -117,7 +116,7 @@ async def removewarns(interaction: discord.Interaction, user: Member, amount: in
     if not any(role.name == allowed_role_name for role in interaction.user.roles):
         await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
         return
-    
+
     if user_id not in warns or len(warns[user_id]) == 0:
         await interaction.response.send_message(f"{user.mention} doesn't have any warns to remove.", ephemeral=True)
         return
@@ -140,12 +139,12 @@ async def removewarns(interaction: discord.Interaction, user: Member, amount: in
 @bot.tree.command(name="checkwarns", description="Check how many warnings a user has.")
 @app_commands.describe(user="The user whose warnings you want to check")
 async def checkwarns(interaction: discord.Interaction, user: Member):
-    user_id = str(user.id)
+    user_id = user.id
     
     if user_id not in warns or len(warns[user_id]) == 0:
         await interaction.response.send_message(f"{user.mention} has no warnings.", ephemeral=True)
         return
-    
+
     warnings = len(warns[user_id])
     await interaction.response.send_message(f"{user.mention} has {warnings} warning(s).", ephemeral=True)
 
