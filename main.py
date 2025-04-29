@@ -34,10 +34,10 @@ class Villager(commands.Bot):
         await self.tree.sync()
 
     async def on_ready(self):
-        channel = self.get_channel(1096981058228064468)
+        channel = self.get_channel(1366904346578649168)
         print(f'✅ {self.user} is ready and online!')
         if channel:
-            await channel.send(f"{self.user.mention} has been deployed successfully")
+            await channel.send(f"{self.user.mention} has been successfully deployed")
         await self.change_presence(activity=discord.Game(name="Minecraft"))
 
 bot = Villager()
