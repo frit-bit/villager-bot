@@ -129,12 +129,6 @@ async def removewarns(interaction: discord.Interaction, user: Member, amount: in
             ephemeral=True
         )
         return
-    if not any(role.name == allowed_role_name for role in interaction.user.roles):
-        await interaction.response.send_message(
-            f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
-            ephemeral=True
-        )
-        return
 
     if user_id not in warns or len(warns[user_id]) == 0:
         await interaction.response.send_message(f"{user.mention} doesn't have any warns to remove.", ephemeral=True)
