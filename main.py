@@ -63,10 +63,10 @@ async def serverinfo(interaction: discord.Interaction):
 @bot.tree.command(name="speak", description="Make the bot say anything")
 @app_commands.describe(message="The message the bot will say.", channel="(Optional) The channel to send the message in.")
 async def speak(interaction: discord.Interaction, message: str, channel: discord.TextChannel = None):
-    allowed_role_name = "Moderator"
-    if not any(role.name == allowed_role_name for role in interaction.user.roles):
+    if not interaction.user.guild_permissions.kick_members:
         await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
         return
+
     if channel:
         await interaction.response.defer(ephemeral=True)
         await channel.send(message)
@@ -86,6 +86,7 @@ async def fight(interaction: discord.Interaction, user: Member, attack: str):
 @bot.tree.command(name="warn", description="Warn a user")
 @app_commands.describe(user="The user you want to warn", reason="The reason for the warn")
 async def warn(interaction: discord.Interaction, user: Member, reason: str = None):
+    
     if not interaction.user.guild_permissions.kick_members:
         await interaction.response.send_message(
             f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
