@@ -120,26 +120,27 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
 @bot.tree.command(name="removewarns", description="Remove a warning from a user.")
 @app_commands.describe(user="The user whose warn you want to remove", amount="The number of warns to remove")
 async def removewarns(interaction: discord.Interaction, user: Member, amount: int):
+    await interaction.response.defer(ephemeral=True)
     user_id = user.id
     prune_old_warns(user_id)
 
     if not interaction.user.guild_permissions.kick_members:
-        await interaction.response.send_message(
+        await interaction.followup.send(
             f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
             ephemeral=True
         )
         return
 
     if user_id not in warns or len(warns[user_id]) == 0:
-        await interaction.response.send_message(f"{user.mention} doesn't have any warns to remove.", ephemeral=True)
+        await interaction.followup.send(f"{user.mention} doesn't have any warns to remove.", ephemeral=True)
         return
 
     if amount <= 0:
-        await interaction.response.send_message("You must specify a positive number to remove.", ephemeral=True)
+        await interaction.followup.send("You must specify a positive number to remove.", ephemeral=True)
         return
 
     if len(warns[user_id]) < amount:
-        await interaction.response.send_message(
+        await interaction.followup.send(
             f"{user.mention} only has {len(warns[user_id])} warns, can't remove {amount}.", ephemeral=True
         )
         return
@@ -148,7 +149,7 @@ async def removewarns(interaction: discord.Interaction, user: Member, amount: in
     if not warns[user_id]:
         del warns[user_id]
 
-    await interaction.response.send_message(
+    await interaction.followup.send(
         f"✅ {amount} warns have been removed from {user.mention}. They now have {len(warns.get(user_id, []))} warns.",
         ephemeral=True
     )
