@@ -7,6 +7,7 @@ from discord import app_commands
 from datetime import datetime, timedelta
 from discord import Member
 
+# [FOR RENDER]:
 '''HOST = '0.0.0.0'  # Or '127.0.0.1', or your specific IP if needed
 PORT = 10000     # Changed to 10000
 
