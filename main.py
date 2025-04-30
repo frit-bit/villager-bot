@@ -30,7 +30,7 @@ while True:
     client_socket.close()'''
 
 
-# Get the bot token from Render's environment variables
+# Get the bot token from environment variables
 TOKEN = os.getenv("DISCORD_TOKEN")
 if not TOKEN:
     raise ValueError("DISCORD_TOKEN environment variable is not set.")
