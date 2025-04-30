@@ -1,10 +1,33 @@
 import os
 import discord
 import asyncio
+import socket
 from discord.ext import commands
 from discord import app_commands
 from datetime import datetime, timedelta
 from discord import Member
+
+HOST = '0.0.0.0'  # Or '127.0.0.1', or your specific IP if needed
+PORT = 10000     # Changed to 10000
+
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.bind((HOST, PORT))
+server_socket.listen()
+
+print(f"Listening on {HOST}:{PORT}")
+
+while True:
+    client_socket, client_address = server_socket.accept()
+    print(f"Accepted connection from {client_address}:{client_address}")
+
+    while True:
+        data = client_socket.recv(1024)
+        if not data:
+            break  
+        client_socket.sendall(data)  # Echo back the received data
+    
+    client_socket.close()
+
 
 # Get the bot token from Render's environment variables
 TOKEN = os.getenv("DISCORD_TOKEN")
