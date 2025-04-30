@@ -7,7 +7,7 @@ from discord import app_commands
 from datetime import datetime, timedelta
 from discord import Member
 
-HOST = '0.0.0.0'  # Or '127.0.0.1', or your specific IP if needed
+'''HOST = '0.0.0.0'  # Or '127.0.0.1', or your specific IP if needed
 PORT = 10000     # Changed to 10000
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,7 +26,7 @@ while True:
             break  
         client_socket.sendall(data)  # Echo back the received data
     
-    client_socket.close()
+    client_socket.close()'''
 
 
 # Get the bot token from Render's environment variables
