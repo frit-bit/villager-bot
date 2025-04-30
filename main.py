@@ -199,7 +199,7 @@ async def checkwarns(interaction: discord.Interaction, user: Member):
 @bot.tree.command(name="annoy", description="annoy someone by repeatedly pinging and sending pointless messages")
 @app_commands.describe(user="The user you want to annoy")
 async def annoy(interaction: discord.Interaction, user: Member):
-    if not interaction.user.guild_permissions.kick_members:
+    if not interaction.user.guild_permissions.mute_members:
         await interaction.response.send_message(
             f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
             ephemeral=True
