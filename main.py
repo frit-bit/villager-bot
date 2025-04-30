@@ -199,15 +199,28 @@ async def checkwarns(interaction: discord.Interaction, user: Member):
 @bot.tree.command(name="annoy", description="annoy someone by repeatedly pinging and sending pointless messages")
 @app_commands.describe(user="The user you want to annoy")
 async def annoy(interaction: discord.Interaction, user: Member):
+
     if not interaction.user.guild_permissions.kick_members:
-        await interaction.response.send_message(f"{user.mention} will be very annoyed with you, {interaction.user.mention}", ephemeral=True)
-        await interaction.followup.send(f"{user.mention}")
-        await interaction.followup.send(f"{user.mention}")
-        await interaction.followup.send("oiiaiaoiiiai")
-        await interaction.followup.send("hawduiiuqhhqefpihwihiskajwhdjhkhiwqhuie")
-        await interaction.followup.send("aaaaaaa")
-        await interaction.followup.send(f"{user.mention}")
-        await interaction.followup.send("awhqewfhriuoyiogqhjbjkefhus")
+        await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
+        return
+
+    await interaction.response.defer()
+        
+    await interaction.followup.send(f"{user.mention} will be very annoyed with you, {interaction.user.mention}", ephemeral=True)
+    await asyncio.sleep(0.5)
+    await interaction.followup.send(f"{user.mention}")
+    await asyncio.sleep(0.5)
+    await interaction.followup.send(f"{user.mention}")
+    await asyncio.sleep(0.5)
+    await interaction.followup.send("oiiaiaoiiiai")
+    await asyncio.sleep(0.5)
+    await interaction.followup.send("hawduiiuqhhqefpihwihiskajwhdjhkhiwqhuie")
+    await asyncio.sleep(0.5)
+    await interaction.followup.send("aaaaaaa")
+    await asyncio.sleep(0.5)
+    await interaction.followup.send(f"{user.mention}")
+    await asyncio.sleep(0.5)
+    await interaction.followup.send("awhqewfhriuoyiogqhjbjkefhus")
 
 @bot.event
 async def on_command_error(ctx, error):
