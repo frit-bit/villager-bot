@@ -195,6 +195,20 @@ async def checkwarns(interaction: discord.Interaction, user: Member):
     warnings = len(warns[user_id])
     await interaction.response.send_message(f"{user.mention} has {warnings} warning(s).", ephemeral=True)
 
+
+@bot.tree.command(name="annoy", description="annoy someone by repeatedly pinging and sending pointless messages")
+@app_commands.describe(user="The user you want to annoy")
+async def annoy(interaction: discord.Interaction, user: Member):
+    if not interaction.user.guild_permissions.kick_members:
+        await interaction.response.send_message(f"{user.mention} will be very annoyed with you, {interaction.user.mention}", ephemeral=True)
+        await interaction.followup.send(f"{user.mention}")
+        await interaction.followup.send(f"{user.mention}")
+        await interaction.followup.send("oiiaiaoiiiai")
+        await interaction.followup.send("hawduiiuqhhqefpihwihiskajwhdjhkhiwqhuie")
+        await interaction.followup.send("aaaaaaa")
+        await interaction.followup.send(f"{user.mention}")
+        await interaction.followup.send("awhqewfhriuoyiogqhjbjkefhus")
+
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
