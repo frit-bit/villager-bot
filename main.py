@@ -218,7 +218,10 @@ async def annoy(interaction: discord.Interaction, user: Member):
     annoying_lines = [
         f"{user.mention}", f"{user.mention}", "oiiaiaoiiiai",
         "hawduiiuqhhqefpihwihiskajwhdjhkhiwqhuie", "aaaaaaa",
-        f"{user.mention}", "awhqewfhriuoyiogqhjbjkefhus"
+        f"{user.mention}", "awhqewfhriuoyiogqhjbjkefhus", 
+        f"{user.mention}", f"{user.mention}", f"{user.mention}", 
+        f"{user.mention}", f"{user.mention}", f"{user.mention}", 
+        f"{user.mention}", f"{user.mention}", f"{user.mention}"
     ]
 
     for line in annoying_lines:
