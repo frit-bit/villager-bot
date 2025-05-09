@@ -1,13 +1,14 @@
 import os
 import discord
 import asyncio
-import socket
+# import socket
+import random
 from discord.ext import commands
 from discord import app_commands
 from datetime import datetime, timedelta
 from discord import Member
 
-# [FOR RENDER]:
+# [FOR RENDER (Remove Comment on import socket)]:
 '''HOST = '0.0.0.0'  # Or '127.0.0.1', or your specific IP if needed
 PORT = 10000     # Changed to 10000
 
@@ -86,6 +87,15 @@ async def serverinfo(interaction: discord.Interaction):
     embed.add_field(name="Created At", value=server.created_at.strftime("%B %d, %Y"), inline=True)
     embed.set_thumbnail(url=server.icon.url if server.icon else None)
     await interaction.response.send_message(embed=embed)
+
+
+@bot.tree.command(name="risky_message", description="[LIMITED TIME] Send a random message from a list, could be normal or VERY weird...")
+@app_commands.describe(user="The user you want to mention in your message")
+async def risky_message(interaction: discord.Interaction, user: Member):
+    message_choice_list = [f"{user.mention}! {interaction.user.mention} knows what a chimpanzee is.", f"{user.mention}! {interaction.user.mention} wants to oof you.",
+                          f"{user.mention}! {interaction.user.mention} likes existing!", f"{user.mention}! {interaction.user.mention} is looking for you.",
+                          f"{user.mention}! {interaction.user.mention} got at least 1 minute of sleep yesterday!", f"{user.mention}! {interaction.user.mention} is a pathogen."]
+    await interaction.response.send_message(f"{random.choice(message_choice_list)}")
 
 @bot.tree.command(name="speak", description="Make the bot say anything")
 @app_commands.describe(message="The message the bot will say.", channel="(Optional) The channel to send the message in.")
