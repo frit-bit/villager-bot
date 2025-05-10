@@ -67,14 +67,10 @@ class Villager(commands.Bot):
         if t_channel:
             await t_channel.send(f"{self.user.mention} has been successfully deployed")
         await self.change_presence(activity=discord.Game(name="Minecraft"))
+        for guild in self.guilds:
+            print(f"Connected to guild: {guild.name} (ID: {guild.id})")
 
-client = discord.Client()
 
-@client.event
-async def on_ready():
-    print(f'{client.user} is connected to Discord!')
-    for guild in client.guilds:
-        print(guild.name)
 
 bot = Villager()
 
