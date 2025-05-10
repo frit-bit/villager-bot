@@ -69,8 +69,7 @@ class Villager(commands.Bot):
         await self.change_presence(activity=discord.Game(name="Minecraft"))
         for guild in self.guilds:
             print(f"Connected to guild: {guild.name} (ID: {guild.id})")
-
-
+        print(f"Total visible guilds: {len(bot.guilds)}")
 
 bot = Villager()
 
