@@ -66,9 +66,11 @@ class Villager(commands.Bot):
         await self.change_presence(activity=discord.Game(name="Minecraft"))
         for guild in self.guilds:
             print(f"Connected to guild: {guild.name} (ID: {guild.id})")
-        print(f"Total visible guilds: {len(bot.guilds)}")
+        print(f"Total visible guilds: {len(self.guilds)}")
 
 bot = Villager()
+
+fritbit_userid = 947551947735576627
 
 @bot.tree.command(name="hello", description="Say hello to the villager!")
 async def hello(interaction: discord.Interaction):
@@ -101,8 +103,11 @@ async def risky_message(interaction: discord.Interaction, user: Member):
 @app_commands.describe(message="The message the bot will say.", channel="(Optional) The channel to send the message in.")
 async def speak(interaction: discord.Interaction, message: str, channel: discord.TextChannel = None):
     if not interaction.user.guild_permissions.kick_members:
-        await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
-        return
+        if interaction.user.id = fritbit_userid:
+            return
+        else:
+            await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
+            return
 
     if channel:
         await interaction.response.defer(ephemeral=True)
