@@ -103,7 +103,7 @@ async def risky_message(interaction: discord.Interaction, user: Member):
 @app_commands.describe(message="The message the bot will say.", channel="(Optional) The channel to send the message in.")
 async def speak(interaction: discord.Interaction, message: str, channel: discord.TextChannel = None):
     if not interaction.user.guild_permissions.kick_members:
-        if interaction.user.id = fritbit_userid:
+        if interaction.user.id == fritbit_userid:
             return
         else:
             await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
