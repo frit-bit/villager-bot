@@ -59,13 +59,10 @@ class Villager(commands.Bot):
         await self.tree.sync()
 
     async def on_ready(self):
-        channel = self.get_channel(1366904346578649168)
-        t_channel = self.get_channel(1366904232317550683)
+        channel = self.get_channel(1366904232317550683)
         print(f'✅ {self.user} is ready and online!')
         if channel:
             await channel.send(f"{self.user.mention} has been successfully deployed")
-        if t_channel:
-            await t_channel.send(f"{self.user.mention} has been successfully deployed")
         await self.change_presence(activity=discord.Game(name="Minecraft"))
         for guild in self.guilds:
             print(f"Connected to guild: {guild.name} (ID: {guild.id})")
