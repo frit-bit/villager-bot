@@ -70,6 +70,11 @@ class Villager(commands.Bot):
 
 bot = Villager()
 
+@client.command()
+async def servers_in(ctx):
+    for guild in client.guilds:
+        print(guild.name)
+
 @bot.tree.command(name="hello", description="Say hello to the villager!")
 async def hello(interaction: discord.Interaction):
     await interaction.response.send_message(f"Hrmmm! Hello {interaction.user.mention}!")
