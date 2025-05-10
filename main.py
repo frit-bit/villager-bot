@@ -67,13 +67,10 @@ class Villager(commands.Bot):
         if t_channel:
             await t_channel.send(f"{self.user.mention} has been successfully deployed")
         await self.change_presence(activity=discord.Game(name="Minecraft"))
+        for guild in client.guilds:
+            print(guild.name)
 
 bot = Villager()
-
-@client.command()
-async def servers_in(ctx):
-    for guild in client.guilds:
-        print(guild.name)
 
 @bot.tree.command(name="hello", description="Say hello to the villager!")
 async def hello(interaction: discord.Interaction):
