@@ -104,6 +104,7 @@ async def risky_message(interaction: discord.Interaction, user: Member):
 async def speak(interaction: discord.Interaction, message: str, channel: discord.TextChannel = None):
     if not interaction.user.guild_permissions.kick_members:
         if interaction.user.id == fritbit_userid:
+            print("fritbit has used /speak.")
             return
         else:
             await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
