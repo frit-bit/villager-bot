@@ -99,6 +99,14 @@ async def risky_message(interaction: discord.Interaction, user: Member):
                           f"{user.mention}! {interaction.user.mention} got at least 1 minute of sleep yesterday!", f"{user.mention}! {interaction.user.mention} is a pathogen."]
     await interaction.response.send_message(f"{random.choice(message_choice_list)}")
 
+@bot.tree.command(name="report", description="Report a bug to the creator/dev(s)")
+@app_commands.describe(bug="The bug or error you want to report.")
+async def report(interaction: discord.Interaction, bug: str):
+    dev = await bot.fetch_user(947551947735576627)
+    await interaction.response.send_message("✅ Your bug has been reported.", ephemeral=True)
+    await dev.send(f"{interaction.user} reported a bug in the bot!\nThey said: '" + bug + "'.")
+
+
 @bot.tree.command(name="speak", description="Make the bot say anything")
 @app_commands.describe(message="The message the bot will say.", channel="(Optional) The channel to send the message in.")
 async def speak(interaction: discord.Interaction, message: str, channel: discord.TextChannel = None):
