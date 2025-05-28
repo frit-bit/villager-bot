@@ -29,7 +29,7 @@ while True:
         if not data:
             break  
         client_socket.sendall(data)  # Echo back the received data
-    
+
     client_socket.close()'''
 
 # Get the bot token from environment variables
@@ -132,7 +132,7 @@ async def speak(interaction: discord.Interaction,
         interaction.user.guild_permissions.kick_members or 
         await bot.is_owner(interaction.user)
     )
-    
+
     if not is_authorized:
         await interaction.response.send_message(
             f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
@@ -171,7 +171,13 @@ async def warn(interaction: discord.Interaction,
                user: Member,
                reason: str = None):
 
-    if not interaction.user.guild_permissions.kick_members:
+    # Check if user has permissions or is the bot owner
+    is_authorized = (
+        interaction.user.guild_permissions.kick_members or 
+        await bot.is_owner(interaction.user)
+    )
+
+    if not is_authorized:
         await interaction.response.send_message(
             f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
             ephemeral=True)
@@ -254,7 +260,13 @@ async def checkwarns(interaction: discord.Interaction, user: Member):
     user_id = user.id
     prune_old_warns(user_id)
 
-    if not interaction.user.guild_permissions.kick_members:
+    # Check if user has permissions or is the bot owner
+    is_authorized = (
+        interaction.user.guild_permissions.kick_members or 
+        await bot.is_owner(interaction.user)
+    )
+
+    if not is_authorized:
         await interaction.response.send_message(
             f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
             ephemeral=True)
