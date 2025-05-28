@@ -4,9 +4,8 @@ import asyncio
 # import socket
 import random
 from discord.ext import commands
-from discord import app_commands
+from discord import app_commands, Member
 from datetime import datetime, timedelta
-from discord import Member
 
 # [FOR RENDER (Remove Comment on import socket)]:
 '''HOST = '0.0.0.0'  # Or '127.0.0.1', or your specific IP if needed
