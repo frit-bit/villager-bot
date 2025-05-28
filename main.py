@@ -74,7 +74,6 @@ class Villager(commands.Bot):
                 f"Connected to guild: {guild.name} (ID: {guild.id}, Member Count {guild.member_count})"
             )
         print(f"Total visible guilds: {len(self.guilds)}")
-        print("Replit git push test")
 
 
 bot = Villager()
