@@ -70,15 +70,8 @@ class Villager(commands.Bot):
                 f"{self.user.mention} has been successfully deployed")
         await self.change_presence(activity=discord.Game(name="Minecraft"))
         for guild in self.guilds:
-            print(f"Connected to guild: {guild.name} (ID: {guild.id})")
+            print(f"Connected to guild: {guild.name} (ID: {guild.id}) (Member Count: {guild.member_count}")
         print(f"Total visible guilds: {len(self.guilds)}")
-        minecraft_server = bot.get_guild(1370804988120666282)
-        if minecraft_server:
-            print(
-                f"Minecraft Server Member Count: {minecraft_server.member_count}"
-            )
-        else:
-            print("Minecraft Server not found")
 
 
 bot = Villager()
