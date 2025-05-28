@@ -72,6 +72,13 @@ class Villager(commands.Bot):
         for guild in self.guilds:
             print(f"Connected to guild: {guild.name} (ID: {guild.id})")
         print(f"Total visible guilds: {len(self.guilds)}")
+        minecraft_server = bot.get_guild(1370804988120666282)
+        if minecraft_server:
+            print(
+                f"Minecraft Server Member Count: {minecraft_server.member_count}"
+            )
+        else:
+            print("Minecraft Server not found")
 
 
 bot = Villager()
