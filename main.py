@@ -77,9 +77,6 @@ class Villager(commands.Bot):
 
 bot = Villager()
 
-fritbit_userid = 947551947735576627
-
-
 @bot.tree.command(name="hello", description="Say hello to the villager!")
 async def hello(interaction: discord.Interaction):
     await interaction.response.send_message(
@@ -130,15 +127,17 @@ async def report(interaction: discord.Interaction, bug: str):
 async def speak(interaction: discord.Interaction,
                 message: str,
                 channel: discord.TextChannel = None):
-    if not interaction.user.guild_permissions.kick_members:
-        if interaction.user.id == fritbit_userid:
-            print("fritbit has used /speak.")
-            pass  # Allow fritbit to continue using the command
-        else:
-            await interaction.response.send_message(
-                f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
-                ephemeral=True)
-            return
+    # Check if user has permissions or is the bot owner
+    is_authorized = (
+        interaction.user.guild_permissions.kick_members or 
+        await bot.is_owner(interaction.user)
+    )
+    
+    if not is_authorized:
+        await interaction.response.send_message(
+            f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
+            ephemeral=True)
+        return
 
     if channel:
         await interaction.response.defer(ephemeral=True)
