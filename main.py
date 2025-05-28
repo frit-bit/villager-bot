@@ -70,12 +70,15 @@ class Villager(commands.Bot):
                 f"{self.user.mention} has been successfully deployed")
         await self.change_presence(activity=discord.Game(name="Minecraft"))
         for guild in self.guilds:
-            print(f"Connected to guild: {guild.name} (ID: {guild.id}, Member Count {guild.member_count})")
+            print(
+                f"Connected to guild: {guild.name} (ID: {guild.id}, Member Count {guild.member_count})"
+            )
         print(f"Total visible guilds: {len(self.guilds)}")
         print("Replit git push test")
 
 
 bot = Villager()
+
 
 @bot.tree.command(name="hello", description="Say hello to the villager!")
 async def hello(interaction: discord.Interaction):
@@ -128,10 +131,8 @@ async def speak(interaction: discord.Interaction,
                 message: str,
                 channel: discord.TextChannel = None):
     # Check if user has permissions or is the bot owner
-    is_authorized = (
-        interaction.user.guild_permissions.kick_members or 
-        await bot.is_owner(interaction.user)
-    )
+    is_authorized = (interaction.user.guild_permissions.kick_members
+                     or await bot.is_owner(interaction.user))
 
     if not is_authorized:
         await interaction.response.send_message(
@@ -172,10 +173,8 @@ async def warn(interaction: discord.Interaction,
                reason: str = None):
 
     # Check if user has permissions or is the bot owner
-    is_authorized = (
-        interaction.user.guild_permissions.kick_members or 
-        await bot.is_owner(interaction.user)
-    )
+    is_authorized = (interaction.user.guild_permissions.kick_members
+                     or await bot.is_owner(interaction.user))
 
     if not is_authorized:
         await interaction.response.send_message(
@@ -261,10 +260,8 @@ async def checkwarns(interaction: discord.Interaction, user: Member):
     prune_old_warns(user_id)
 
     # Check if user has permissions or is the bot owner
-    is_authorized = (
-        interaction.user.guild_permissions.kick_members or 
-        await bot.is_owner(interaction.user)
-    )
+    is_authorized = (interaction.user.guild_permissions.kick_members
+                     or await bot.is_owner(interaction.user))
 
     if not is_authorized:
         await interaction.response.send_message(
