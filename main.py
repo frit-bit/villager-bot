@@ -133,7 +133,7 @@ async def speak(interaction: discord.Interaction,
     if not interaction.user.guild_permissions.kick_members:
         if interaction.user.id == fritbit_userid:
             print("fritbit has used /speak.")
-            return
+            pass  # Allow fritbit to continue using the command
         else:
             await interaction.response.send_message(
                 f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
