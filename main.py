@@ -110,25 +110,6 @@ async def serverinfo(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed)
 
 
-@bot.tree.command(
-    name="risky_message",
-    description=
-    "[LIMITED TIME] Send a random message from a list, could be normal or VERY weird..."
-)
-@app_commands.describe(user="The user you want to mention in your message")
-async def risky_message(interaction: discord.Interaction, user: Member):
-    message_choice_list = [
-        f"{user.mention}! {interaction.user.mention} knows what a chimpanzee is.",
-        f"{user.mention}! {interaction.user.mention} wants to oof you.",
-        f"{user.mention}! {interaction.user.mention} likes existing!",
-        f"{user.mention}! {interaction.user.mention} is looking for you.",
-        f"{user.mention}! {interaction.user.mention} got at least 1 minute of sleep yesterday!",
-        f"{user.mention}! {interaction.user.mention} is a pathogen."
-    ]
-    await interaction.response.send_message(
-        f"{random.choice(message_choice_list)}")
-
-
 @bot.tree.command(name="report",
                   description="Report a bug to the creator/dev(s)")
 @app_commands.describe(bug="The bug or error you want to report.")
