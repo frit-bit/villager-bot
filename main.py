@@ -6,6 +6,9 @@ import random
 from discord.ext import commands
 from discord import app_commands, Member
 from datetime import datetime, timedelta
+from keep_alive import keep_alive
+
+keep_alive()
 
 # [FOR RENDER (Remove Comment on import socket)]:
 '''HOST = '0.0.0.0'  # Or '127.0.0.1', or your specific IP if needed
@@ -29,7 +32,6 @@ while True:
     
     client_socket.close()'''
 
-
 # Get the bot token from environment variables
 TOKEN = os.getenv("DISCORD_TOKEN")
 if not TOKEN:
@@ -37,6 +39,7 @@ if not TOKEN:
 
 # In-memory warning storage
 warns = {}
+
 
 def prune_old_warns(user_id):
     if user_id in warns:
@@ -47,7 +50,9 @@ def prune_old_warns(user_id):
         if not warns[user_id]:  # Remove empty lists
             del warns[user_id]
 
+
 class Villager(commands.Bot):
+
     def __init__(self):
         intents = discord.Intents.default()
         intents.message_content = True
@@ -61,87 +66,134 @@ class Villager(commands.Bot):
         channel = self.get_channel(1366904232317550683)
         print(f'✅ {self.user} is ready and online!')
         if channel:
-            await channel.send(f"{self.user.mention} has been successfully deployed")
+            await channel.send(
+                f"{self.user.mention} has been successfully deployed")
         await self.change_presence(activity=discord.Game(name="Minecraft"))
         for guild in self.guilds:
             print(f"Connected to guild: {guild.name} (ID: {guild.id})")
         print(f"Total visible guilds: {len(self.guilds)}")
 
+
 bot = Villager()
 
 fritbit_userid = 947551947735576627
 
+
 @bot.tree.command(name="hello", description="Say hello to the villager!")
 async def hello(interaction: discord.Interaction):
-    await interaction.response.send_message(f"Hrmmm! Hello {interaction.user.mention}!")
+    await interaction.response.send_message(
+        f"Hrmmm! Hello {interaction.user.mention}!")
+
 
 @bot.tree.command(name="ping", description="Check bot's latency")
 async def ping(interaction: discord.Interaction):
-    await interaction.response.send_message(f"Pong! Latency: {round(bot.latency * 1000)}ms")
+    await interaction.response.send_message(
+        f"Pong! Latency: {round(bot.latency * 1000)}ms")
 
-@bot.tree.command(name="serverinfo", description="Get information about the server")
+
+@bot.tree.command(name="serverinfo",
+                  description="Get information about the server")
 async def serverinfo(interaction: discord.Interaction):
     server = interaction.guild
-    embed = discord.Embed(title=f"Info about {server.name}:", color=discord.Color.green())
-    embed.add_field(name="Server Owner", value=server.owner.mention, inline=False)
-    embed.add_field(name="Member Count", value=server.member_count, inline=True)
-    embed.add_field(name="Created At", value=server.created_at.strftime("%B %d, %Y"), inline=True)
+    embed = discord.Embed(title=f"Info about {server.name}:",
+                          color=discord.Color.green())
+    embed.add_field(name="Server Owner",
+                    value=server.owner.mention,
+                    inline=False)
+    embed.add_field(name="Member Count",
+                    value=server.member_count,
+                    inline=True)
+    embed.add_field(name="Created At",
+                    value=server.created_at.strftime("%B %d, %Y"),
+                    inline=True)
     embed.set_thumbnail(url=server.icon.url if server.icon else None)
     await interaction.response.send_message(embed=embed)
 
 
-@bot.tree.command(name="risky_message", description="[LIMITED TIME] Send a random message from a list, could be normal or VERY weird...")
+@bot.tree.command(
+    name="risky_message",
+    description=
+    "[LIMITED TIME] Send a random message from a list, could be normal or VERY weird..."
+)
 @app_commands.describe(user="The user you want to mention in your message")
 async def risky_message(interaction: discord.Interaction, user: Member):
-    message_choice_list = [f"{user.mention}! {interaction.user.mention} knows what a chimpanzee is.", f"{user.mention}! {interaction.user.mention} wants to oof you.",
-                          f"{user.mention}! {interaction.user.mention} likes existing!", f"{user.mention}! {interaction.user.mention} is looking for you.",
-                          f"{user.mention}! {interaction.user.mention} got at least 1 minute of sleep yesterday!", f"{user.mention}! {interaction.user.mention} is a pathogen."]
-    await interaction.response.send_message(f"{random.choice(message_choice_list)}")
+    message_choice_list = [
+        f"{user.mention}! {interaction.user.mention} knows what a chimpanzee is.",
+        f"{user.mention}! {interaction.user.mention} wants to oof you.",
+        f"{user.mention}! {interaction.user.mention} likes existing!",
+        f"{user.mention}! {interaction.user.mention} is looking for you.",
+        f"{user.mention}! {interaction.user.mention} got at least 1 minute of sleep yesterday!",
+        f"{user.mention}! {interaction.user.mention} is a pathogen."
+    ]
+    await interaction.response.send_message(
+        f"{random.choice(message_choice_list)}")
 
-@bot.tree.command(name="report", description="Report a bug to the creator/dev(s)")
+
+@bot.tree.command(name="report",
+                  description="Report a bug to the creator/dev(s)")
 @app_commands.describe(bug="The bug or error you want to report.")
 async def report(interaction: discord.Interaction, bug: str):
     dev = await bot.fetch_user(947551947735576627)
-    await interaction.response.send_message("✅ Your bug has been reported.", ephemeral=True)
-    await dev.send(f"{interaction.user} reported a bug in the bot!\nThey said: '" + bug + "'.")
+    await interaction.response.send_message("✅ Your bug has been reported.",
+                                            ephemeral=True)
+    await dev.send(
+        f"{interaction.user} reported a bug in the bot!\nThey said: '" + bug +
+        "'.")
 
 
 @bot.tree.command(name="speak", description="Make the bot say anything")
-@app_commands.describe(message="The message the bot will say.", channel="(Optional) The channel to send the message in.")
-async def speak(interaction: discord.Interaction, message: str, channel: discord.TextChannel = None):
+@app_commands.describe(
+    message="The message the bot will say.",
+    channel="(Optional) The channel to send the message in.")
+async def speak(interaction: discord.Interaction,
+                message: str,
+                channel: discord.TextChannel = None):
     if not interaction.user.guild_permissions.kick_members:
         if interaction.user.id == fritbit_userid:
             print("fritbit has used /speak.")
             return
         else:
-            await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
+            await interaction.response.send_message(
+                f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
+                ephemeral=True)
             return
 
     if channel:
         await interaction.response.defer(ephemeral=True)
         await channel.send(message)
-        await interaction.followup.send(f"✅ Sent message in {channel.mention}", ephemeral=True)
+        await interaction.followup.send(f"✅ Sent message in {channel.mention}",
+                                        ephemeral=True)
     else:
-        await interaction.response.send_message("✅ Sent message", ephemeral=True)
+        await interaction.response.send_message("✅ Sent message",
+                                                ephemeral=True)
         await interaction.channel.send(message)
 
-@bot.tree.command(name="fight", description="Fight people using ANY custom move (just for fun)")
-@app_commands.describe(user="The user you want to attack", attack="The attack you want to do")
+
+@bot.tree.command(
+    name="fight",
+    description="Fight people using ANY custom move (just for fun)")
+@app_commands.describe(user="The user you want to attack",
+                       attack="The attack you want to do")
 async def fight(interaction: discord.Interaction, user: Member, attack: str):
     if user == interaction.client.user:
         await interaction.response.send_message("😡 Hrmm! *punches you*")
     else:
-        await interaction.response.send_message(f"{user.mention}! {interaction.user.mention} has done '{attack}' to you!")
+        await interaction.response.send_message(
+            f"{user.mention}! {interaction.user.mention} has done '{attack}' to you!"
+        )
+
 
 @bot.tree.command(name="warn", description="Warn a user")
-@app_commands.describe(user="The user you want to warn", reason="The reason for the warn")
-async def warn(interaction: discord.Interaction, user: Member, reason: str = None):
-    
+@app_commands.describe(user="The user you want to warn",
+                       reason="The reason for the warn")
+async def warn(interaction: discord.Interaction,
+               user: Member,
+               reason: str = None):
+
     if not interaction.user.guild_permissions.kick_members:
         await interaction.response.send_message(
             f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
-            ephemeral=True
-        )
+            ephemeral=True)
         return
 
     user_id = user.id
@@ -161,15 +213,23 @@ async def warn(interaction: discord.Interaction, user: Member, reason: str = Non
 
     if channel:
         if 1 < warnings <= 4:
-            time_delta = timedelta(days=1 if warnings == 2 else 7 if warnings == 3 else 3)
-            await user.timeout(time_delta, reason=f"Received {warnings} warnings.")
-            await channel.send(f"{user.mention} has been timed out for {time_delta.days} day(s).")
+            time_delta = timedelta(
+                days=1 if warnings == 2 else 7 if warnings == 3 else 3)
+            await user.timeout(time_delta,
+                               reason=f"Received {warnings} warnings.")
+            await channel.send(
+                f"{user.mention} has been timed out for {time_delta.days} day(s)."
+            )
         if warnings == 5:
             await user.ban(reason=f"Received {warnings} warns.")
 
-@bot.tree.command(name="removewarns", description="Remove a warning from a user.")
-@app_commands.describe(user="The user whose warn you want to remove", amount="The number of warns to remove")
-async def removewarns(interaction: discord.Interaction, user: Member, amount: int):
+
+@bot.tree.command(name="removewarns",
+                  description="Remove a warning from a user.")
+@app_commands.describe(user="The user whose warn you want to remove",
+                       amount="The number of warns to remove")
+async def removewarns(interaction: discord.Interaction, user: Member,
+                      amount: int):
     await interaction.response.defer(ephemeral=True)
     user_id = user.id
     prune_old_warns(user_id)
@@ -177,22 +237,24 @@ async def removewarns(interaction: discord.Interaction, user: Member, amount: in
     if not interaction.user.guild_permissions.kick_members:
         await interaction.followup.send(
             f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
-            ephemeral=True
-        )
+            ephemeral=True)
         return
 
     if user_id not in warns or len(warns[user_id]) == 0:
-        await interaction.followup.send(f"{user.mention} doesn't have any warns to remove.", ephemeral=True)
+        await interaction.followup.send(
+            f"{user.mention} doesn't have any warns to remove.",
+            ephemeral=True)
         return
 
     if amount <= 0:
-        await interaction.followup.send("You must specify a positive number to remove.", ephemeral=True)
+        await interaction.followup.send(
+            "You must specify a positive number to remove.", ephemeral=True)
         return
 
     if len(warns[user_id]) < amount:
         await interaction.followup.send(
-            f"{user.mention} only has {len(warns[user_id])} warns, can't remove {amount}.", ephemeral=True
-        )
+            f"{user.mention} only has {len(warns[user_id])} warns, can't remove {amount}.",
+            ephemeral=True)
         return
 
     warns[user_id] = warns[user_id][:-amount]
@@ -201,42 +263,48 @@ async def removewarns(interaction: discord.Interaction, user: Member, amount: in
 
     await interaction.followup.send(
         f"✅ {amount} warns have been removed from {user.mention}. They now have {len(warns.get(user_id, []))} warns.",
-        ephemeral=True
-    )
+        ephemeral=True)
 
-@bot.tree.command(name="checkwarns", description="Check how many warnings a user has.")
+
+@bot.tree.command(name="checkwarns",
+                  description="Check how many warnings a user has.")
 @app_commands.describe(user="The user whose warnings you want to check")
 async def checkwarns(interaction: discord.Interaction, user: Member):
     user_id = user.id
     prune_old_warns(user_id)
 
     if not interaction.user.guild_permissions.kick_members:
-        await interaction.response.send_message(f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.", ephemeral=True)
+        await interaction.response.send_message(
+            f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
+            ephemeral=True)
         return
 
     if user_id not in warns or len(warns[user_id]) == 0:
-        await interaction.response.send_message(f"{user.mention} has no warnings.", ephemeral=True)
+        await interaction.response.send_message(
+            f"{user.mention} has no warnings.", ephemeral=True)
         return
 
     warnings = len(warns[user_id])
-    await interaction.response.send_message(f"{user.mention} has {warnings} warning(s).", ephemeral=True)
+    await interaction.response.send_message(
+        f"{user.mention} has {warnings} warning(s).", ephemeral=True)
 
 
-@bot.tree.command(name="annoy", description="annoy someone by repeatedly pinging and sending pointless messages")
+@bot.tree.command(
+    name="annoy",
+    description=
+    "annoy someone by repeatedly pinging and sending pointless messages")
 @app_commands.describe(user="The user you want to annoy")
 async def annoy(interaction: discord.Interaction, user: Member):
     if not interaction.user.guild_permissions.mute_members:
         await interaction.response.send_message(
             f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
-            ephemeral=True
-        )
+            ephemeral=True)
         return
 
     # First response: ephemeral
     await interaction.response.send_message(
         f"{user.mention} will be very annoyed with you, {interaction.user.mention}",
-        ephemeral=True
-    )
+        ephemeral=True)
 
     # Send public spam messages separately
     await asyncio.sleep(1)  # Short delay to separate the first response
@@ -244,10 +312,10 @@ async def annoy(interaction: discord.Interaction, user: Member):
     annoying_lines = [
         f"{user.mention}", f"{user.mention}", "oiiaiaoiiiai",
         "hawduiiuqhhqefpihwihiskajwhdjhkhiwqhuie", "aaaaaaa",
-        f"{user.mention}", "awhqewfhriuoyiogqhjbjkefhus", 
-        f"{user.mention}", f"{user.mention}", f"{user.mention}", 
-        f"{user.mention}", f"{user.mention}", f"{user.mention}", 
-        f"{user.mention}", f"{user.mention}", f"{user.mention}"
+        f"{user.mention}", "awhqewfhriuoyiogqhjbjkefhus", f"{user.mention}",
+        f"{user.mention}", f"{user.mention}", f"{user.mention}",
+        f"{user.mention}", f"{user.mention}", f"{user.mention}",
+        f"{user.mention}", f"{user.mention}"
     ]
 
     for line in annoying_lines:
@@ -258,11 +326,13 @@ async def annoy(interaction: discord.Interaction, user: Member):
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
-        await ctx.send("Nice try, but you don't have permission to use this command.")
+        await ctx.send(
+            "Nice try, but you don't have permission to use this command.")
     elif isinstance(error, commands.CommandNotFound):
         await ctx.send("Command not found.")
     else:
         await ctx.send("An error occurred.")
         raise error
+
 
 bot.run(TOKEN)
