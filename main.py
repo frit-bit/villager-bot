@@ -115,7 +115,7 @@ async def serverinfo(interaction: discord.Interaction):
 @app_commands.describe(bug="The bug or error you want to report.")
 async def report(interaction: discord.Interaction, bug: str):
     dev = await bot.fetch_user(947551947735576627)
-    await interaction.response.send_message("✅ Your bug has been reported.",
+    await interaction.response.send_message(f"✅ Your bug has been reported to {bot.is_owner} .",
                                             ephemeral=True)
     await dev.send(
         f"{interaction.user} reported a bug in the bot!\nThey said: '" + bug +
