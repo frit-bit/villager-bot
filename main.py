@@ -88,7 +88,7 @@ async def hello(interaction: discord.Interaction):
 @bot.tree.command(name="ping", description="Check bot's latency")
 async def ping(interaction: discord.Interaction):
     await interaction.response.send_message(
-        f"Pong! Latency: {round(bot.latency * 1000)}ms")
+        f"🏓  **Latency:** {round(bot.latency * 1000)} ms  🏓")
 
 
 @bot.tree.command(name="serverinfo",
@@ -117,8 +117,8 @@ async def report(interaction: discord.Interaction, bug: str):
     dev = await bot.fetch_user(947551947735576627)
     app_info = await bot.application_info()
     owner = app_info.owner
-    await interaction.response.send_message(f"✅ Your bug has been reported to {owner.name}.",
-                                            ephemeral=True)
+    await interaction.response.send_message(
+        f"✅ Your bug has been reported to {owner.name}.", ephemeral=True)
     await dev.send(
         f"{interaction.user} reported a bug in the bot!\nThey said: '" + bug +
         "'.")

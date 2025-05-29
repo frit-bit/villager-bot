@@ -6,7 +6,7 @@ app = Flask('')
 
 @app.route('/')
 def home():
-    return "I'm alive"
+    return "The app has been deployed successfully. It is currently up and usable on discord."
 
 
 def run():
