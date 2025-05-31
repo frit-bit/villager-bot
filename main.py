@@ -259,40 +259,6 @@ async def checkwarns(interaction: discord.Interaction, user: Member):
         f"{user.mention} has {warnings} warning(s).", ephemeral=True)
 
 
-@bot.tree.command(
-    name="annoy",
-    description=
-    "[MOD-ONLY] annoy someone by repeatedly pinging and sending pointless messages")
-@app_commands.describe(user="The user you want to annoy")
-async def annoy(interaction: discord.Interaction, user: Member):
-    if not interaction.user.guild_permissions.mute_members:
-        await interaction.response.send_message(
-            f"Nice try, {interaction.user.mention}, but you don't have permission to use this                command.",
-            ephemeral=True)
-        return
-
-    # First response: ephemeral
-    await interaction.response.send_message(
-        f"{user.mention} will be very annoyed with you, {interaction.user.mention}",
-        ephemeral=True)
-
-    # Send public spam messages separately
-    await asyncio.sleep(1)  # Short delay to separate the first response
-
-    annoying_lines = [
-        f"{user.mention}", f"{user.mention}", "oiiaiaoiiiai",
-        "hawduiiuqhhqefpihwihiskajwhdjhkhiwqhuie", "aaaaaaa",
-        f"{user.mention}", "awhqewfhriuoyiogqhjbjkefhus", f"{user.mention}",
-        f"{user.mention}", f"{user.mention}", f"{user.mention}",
-        f"{user.mention}", f"{user.mention}", f"{user.mention}",
-        f"{user.mention}", f"{user.mention}"
-    ]
-
-    for line in annoying_lines:
-        await interaction.channel.send(line)  # ✅ Public
-        await asyncio.sleep(0.5)
-
-
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
