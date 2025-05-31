@@ -46,7 +46,7 @@ class Villager(commands.Bot):
         print(f'✅ {self.user} is ready and online!')
         if channel:
             await channel.send(
-                f"{self.user.mention} has been successfully deployed")
+                f"{self.user.mention} has been successfully deployed.")
         await self.change_presence(activity=discord.Game(name="Minecraft"))
         for guild in self.guilds:
             print(
