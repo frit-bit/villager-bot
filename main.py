@@ -1,41 +1,20 @@
 import os
 import discord
 import asyncio
-# import socket
 import random
 from discord.ext import commands
 from discord import app_commands, Member
 from datetime import datetime, timedelta
 from keep_alive import keep_alive
+from flask import Flask
+from threading import Thread
 
 keep_alive()
 
-# [FOR RENDER (Remove Comment on import socket)]:
-'''HOST = '0.0.0.0'  # Or '127.0.0.1', or your specific IP if needed
-PORT = 10000     # Changed to 10000
-
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind((HOST, PORT))
-server_socket.listen()
-
-print(f"Listening on {HOST}:{PORT}")
-
-while True:
-    client_socket, client_address = server_socket.accept()
-    print(f"Accepted connection from {client_address}:{client_address}")
-
-    while True:
-        data = client_socket.recv(1024)
-        if not data:
-            break  
-        client_socket.sendall(data)  # Echo back the received data
-
-    client_socket.close()'''
-
 # Get the bot token from environment variables
-TOKEN = os.getenv("DISCORD_TOKEN")
+TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 if not TOKEN:
-    raise ValueError("DISCORD_TOKEN environment variable is not set.")
+    raise ValueError("DISCORD_BOT_TOKEN environment variable is not set.")
 
 # In-memory warning storage
 warns = {}
@@ -266,7 +245,7 @@ async def checkwarns(interaction: discord.Interaction, user: Member):
 
     if not is_authorized:
         await interaction.response.send_message(
-            f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
+            f"Nice try, {interaction.user.mention}, but you don't have permission to use this                command.",
             ephemeral=True)
         return
 
@@ -288,7 +267,7 @@ async def checkwarns(interaction: discord.Interaction, user: Member):
 async def annoy(interaction: discord.Interaction, user: Member):
     if not interaction.user.guild_permissions.mute_members:
         await interaction.response.send_message(
-            f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
+            f"Nice try, {interaction.user.mention}, but you don't have permission to use this                command.",
             ephemeral=True)
         return
 
@@ -318,7 +297,7 @@ async def annoy(interaction: discord.Interaction, user: Member):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send(
-            "Nice try, but you don't have permission to use this command.")
+            "Nice try but you don't have permission to use this command.")
     elif isinstance(error, commands.CommandNotFound):
         await ctx.send("Command not found.")
     else:
