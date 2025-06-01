@@ -145,6 +145,13 @@ async def fight(interaction: discord.Interaction, user: Member, attack: str):
         )
 
 
+@bot.tree.command(name="coinflip", description="Flip a coin")
+@app_commands.describe(choice="Flip a coin that lands on heads or tails")
+async def coinflip(interaction: discord.Interaction, choice: ):
+    result = random.choice(["heads", "tails"])
+    if choice == (result == "heads"):
+
+
 @bot.tree.command(name="warn", description="Warn a user")
 @app_commands.describe(user="The user you want to warn",
                        reason="The reason for the warn")
