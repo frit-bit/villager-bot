@@ -148,7 +148,9 @@ async def fight(interaction: discord.Interaction, user: Member, attack: str):
 @bot.tree.command(name="coinflip", description="Flip a coin")
 @app_commands.describe(choice="Flip a coin that lands on heads or tails")
 async def coinflip(interaction: discord.Interaction):
-    await interaction.response.send_message(f"The coin landed on {random.choice(['heads',                                               'tails'])}.")
+    await interaction.response.send_message(
+        f"The coin landed on {random.choice(['heads',                                               'tails'])}."
+    )
 
 
 @bot.tree.command(name="warn", description="Warn a user")
