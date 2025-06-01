@@ -152,10 +152,10 @@ async def coinflip(interaction: discord.Interaction):
     )
 
 
-@bot.tree.command(name="checkbot", description="Check if a specific bot is online")
+@bot.tree.command(name="skibidibotdead", description="Check if skibidi bot is online (something from QTC discord server)")
 async def checkbot(interaction: discord.Interaction):
     # Replace this ID with the specific bot's ID you want to check
-    specific_bot_id = 1234567890123456789  # Put the actual bot ID here
+    specific_bot_id = 1342990342999248936  # Put the actual bot ID here
     
     try:
         target_bot = await bot.fetch_user(specific_bot_id)
@@ -173,13 +173,13 @@ async def checkbot(interaction: discord.Interaction):
         # Check bot's status
         status = guild_member.status
         if status == discord.Status.online:
-            await interaction.response.send_message(f"✅ {target_bot.name} is **online**!")
+            await interaction.response.send_message(f"✅ {target_bot.name} is **online** for once!")
         elif status == discord.Status.idle:
             await interaction.response.send_message(f"🟡 {target_bot.name} is **idle**!")
         elif status == discord.Status.dnd:
             await interaction.response.send_message(f"🔴 {target_bot.name} is **do not disturb**!")
         else:
-            await interaction.response.send_message(f"⚫ {target_bot.name} is **offline**!")
+            await interaction.response.send_message(f"⚫ {target_bot.name} is dead. Again.")
             
     except discord.NotFound:
         await interaction.response.send_message("❌ Bot not found! Make sure the bot ID is correct.", ephemeral=True)
