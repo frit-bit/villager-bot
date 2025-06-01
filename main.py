@@ -152,20 +152,37 @@ async def coinflip(interaction: discord.Interaction):
     )
 
 
+@bot.tree.command(name="8ball", description="Ask the 8ball a question")
+@app_commands.describe(question="The question you want to ask the 8ball")
+async def eightball(interaction: discord.Interaction, question: str):
+    responses = [
+         "It is certain.", "It is decidedly so.", "Without a doubt.",
+         "Yes - definitely.", "You may rely on it.", "As I see it, yes.",
+         "Most likely.", "Outlook good.", "Yes.", "Signs point to yes.",
+         "Reply hazy, try again.", "Ask again later.", "Better not tell you now.",
+         "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.",
+         "My reply is no.", "My sources say no.", "Outlook not so good.",
+         "Very doubtful."
+     ]
+    embed = discord.Embed(title="🎱 8ball 🎱", color=discord.Color.blue())
+    embed.add_field(name="Question", value=f"{interaction.user.mention} asked, {question}", inline=False)
+    embed.add_field(name="Answer", value=f"The 8ball says, {random.choice(responses)}", inline=False)
+
+
 @bot.tree.command(name="skibidibotdead", description="Check if skibidi bot is online (something from QTC discord server)")
 async def checkbot(interaction: discord.Interaction):
     # Replace this ID with the specific bot's ID you want to check
-    specific_bot_id = 1342990342999248936  # Put the actual bot ID here
+    skibidi_bot_id = 1342990342999248936  # Put the actual bot ID here
     
     try:
-        target_bot = await bot.fetch_user(specific_bot_id)
+        target_bot = await bot.fetch_user(skibidi_bot_id)
         
         if not target_bot.bot:
             await interaction.response.send_message(f"❌ {target_bot.name} is not a bot!", ephemeral=True)
             return
         
         # Check if bot is in the current guild
-        guild_member = interaction.guild.get_member(specific_bot_id)
+        guild_member = interaction.guild.get_member(skibidi_bot_id)
         if guild_member is None:
             await interaction.response.send_message(f"❌ {target_bot.name} is not in this server!", ephemeral=True)
             return
