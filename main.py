@@ -169,8 +169,8 @@ async def eightball(interaction: discord.Interaction, question: str):
          "Very doubtful."
      ]
     embed = discord.Embed(title="🎱 8ball 🎱", color=discord.Color.blue())
-    embed.add_field(name="Question", value=f"{interaction.user.mention} asked, {question}", inline=False)
-    embed.add_field(name="Answer", value=f"The 8ball says, {random.choice(responses)}", inline=False)
+    embed.add_field(name="Question", value=f"{interaction.user.mention} asked: '{question}'", inline=False)
+    embed.add_field(name="Answer", value=f"The 8ball says: '{random.choice(responses)}'", inline=False)
     await interaction.response.send_message(embed=embed)
 
 
