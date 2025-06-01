@@ -39,7 +39,11 @@ class Villager(commands.Bot):
         super().__init__(command_prefix='!', intents=intents)
 
     async def setup_hook(self):
-        await self.tree.sync()
+        try:
+            synced = await self.tree.sync()
+            print(f"Synced {len(synced)} command(s)")
+        except Exception as e:
+            print(f"Failed to sync commands: {e}")
 
     async def on_ready(self):
         channel = self.get_channel(1366904232317550683)
