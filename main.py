@@ -152,6 +152,41 @@ async def coinflip(interaction: discord.Interaction):
     )
 
 
+@bot.tree.command(name="checkbot", description="Check if a specific bot is online")
+async def checkbot(interaction: discord.Interaction):
+    # Replace this ID with the specific bot's ID you want to check
+    specific_bot_id = 1234567890123456789  # Put the actual bot ID here
+    
+    try:
+        target_bot = await bot.fetch_user(specific_bot_id)
+        
+        if not target_bot.bot:
+            await interaction.response.send_message(f"❌ {target_bot.name} is not a bot!", ephemeral=True)
+            return
+        
+        # Check if bot is in the current guild
+        guild_member = interaction.guild.get_member(specific_bot_id)
+        if guild_member is None:
+            await interaction.response.send_message(f"❌ {target_bot.name} is not in this server!", ephemeral=True)
+            return
+        
+        # Check bot's status
+        status = guild_member.status
+        if status == discord.Status.online:
+            await interaction.response.send_message(f"✅ {target_bot.name} is **online**!")
+        elif status == discord.Status.idle:
+            await interaction.response.send_message(f"🟡 {target_bot.name} is **idle**!")
+        elif status == discord.Status.dnd:
+            await interaction.response.send_message(f"🔴 {target_bot.name} is **do not disturb**!")
+        else:
+            await interaction.response.send_message(f"⚫ {target_bot.name} is **offline**!")
+            
+    except discord.NotFound:
+        await interaction.response.send_message("❌ Bot not found! Make sure the bot ID is correct.", ephemeral=True)
+    except Exception as e:
+        await interaction.response.send_message(f"❌ An error occurred: {str(e)}", ephemeral=True)
+
+
 @bot.tree.command(name="warn", description="Warn a user")
 @app_commands.describe(user="The user you want to warn",
                        reason="The reason for the warn")
