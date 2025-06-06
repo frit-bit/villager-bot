@@ -5,7 +5,6 @@ import random
 from discord.ext import commands
 from discord import app_commands, Member
 from datetime import datetime, timedelta
-from keep_alive import keep_alive
 from threading import Thread
 from dotenv import load_dotenv
 
