@@ -165,7 +165,8 @@ async def eightball(interaction: discord.Interaction, question: str):
         "Reply hazy, try again.", "Ask again later.",
         "Better not tell you now.", "Cannot predict now.",
         "Concentrate and ask again.", "Don't count on it.", "My reply is no.",
-        "My sources say no.", "Outlook not so good.", "Very doubtful."
+        "My sources say no.", "Outlook not so good.", "Very doubtful.", "Absolutely not, you idiot.",
+        "Obviously.", "I don't want to answer this question.", "No.", "h̵̡̨̛̺̲͍̞͇̳̹̪̽̐̃̇̀́̽̋̀͐̈͌̋̚̕͜͜͝͝a̷̹̺̪͎̬͉̟̹͖̦͚̖̓̏̕ͅh̵̡̳̗̲̲͍̺̙͎͈͚̱͈̽̐͒̀̈́͑̊̕̕̚ͅä̷̢̧̛̛̻̺̫̻̭̙͔͇̯̖̮̩̱̻̲͈̎̋̍͛͊̈̈̀́̋͗̌̒͘ḩ̴̞̞͓̘̖̱͚̼̣͍̤̯̻̣͖̭͈̊̌͑̉̆͗̾͒ą̵̦̹̬̼̘̭͕͈͍̠̹̰̪̻̳̮͚̓̋̽̚̚h̵̯̰̤̤̝̜͔̥̝̙̳̰͈̭̤̗̹̓͊̒̆̒ͅͅa̸̟̮̒̀̀̃̈́̿͑͆͠ẖ̸̠̝̣̋̇́̂̋͗̈́͋̒͆̕͜ͅͅḁ̴̭̗̗͖̩̳͚͎̈́̑͛̉̾̀͒͊̃̒́̏̒͐͂̓͜h̵̹̠̝̽ä̸̢̡̨̡̛͈̹̝͈̭̺̟̤͇̳̹̼̦̝́̇̒̋̓̀͌̈́̿͂͒̊̾̑͆͘͝ḩ̷̞͖̿̽͘a̷̦͉̦̼̞̱͗̆́̈̓̈̿̀̕͘͠h̶̨̨̡̨̛̝̞̭̣̖̗͖͕̰̠̻͍̝͚͗̄̄͐̏̌̌͆̅̀̓̉̈́̕a̸̡̙̲̥̙̪̖̲̘̣͍͖̬̱̐́̂̐͑̀̈́͒͌̓͂̍̄̚̕͝h̷̰̯͉̻̝͓̥̙̞̆͌̔̾̐̐͆́͂̒̀ą̷͍͎̮͙͈̥̬̜͉̫͋͛̒̈́̆̾̂̚͠ḧ̵̡̢̨͈͇͍̹̣͚̮͕̫̮́̎̊̈́͊͒́̈́͛͛̆͐͊̉̑̚͠͝͠ā̷̢͈̯̮͇̫̯͉̯̤̼͔̼̲̞̰̍́͐̄̐̆̐͑̍͆̅͋͊̀͑̕̕h̴͉̜̤̞͔̗͛̑̄́̾͆͋͒̿̎̈́ȁ̴̦͍͉͙͈̬͕̯̼̻̙̱̬̰̎̀̉̂̄̓̓h̸̡̫͍̳̘̠̖̥̞̜̯̠̲͌́̂̇͝ḁ̷͉͊̌̇̏̑̇̾̂̓̔̄̂͂̋̚̕"
     ]
     embed = discord.Embed(title="🎱 8ball 🎱", color=discord.Color.blue())
     embed.add_field(name="Question",
