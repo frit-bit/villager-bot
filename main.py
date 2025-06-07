@@ -32,13 +32,14 @@ def prune_old_warns(user_id):
 class Villager(commands.Bot):
 
     def __init__(self):
-        intents = discord.Intents.default()
-        intents.message_content = True
-        intents.members = True
-        super().__init__(command_prefix='!', intents=intents)
+        intents = discord.Intents.all()
+        super().__init__(command_prefix='!',
+                         intents=intents,
+                         dm_help=True)
 
     async def setup_hook(self):
         try:
+            self.tree.default_permissions = None
             synced = await self.tree.sync()
             print(f"Synced {len(synced)} command(s)")
         except Exception as e:
@@ -74,7 +75,8 @@ async def ping(interaction: discord.Interaction):
 
 
 @bot.tree.command(name="serverinfo",
-                  description="Get information about the server")
+                  description="Get information about the server",
+                  )
 async def serverinfo(interaction: discord.Interaction):
     server = interaction.guild
     embed = discord.Embed(title=f"Info about {server.name}:",
@@ -93,7 +95,8 @@ async def serverinfo(interaction: discord.Interaction):
 
 
 @bot.tree.command(name="report",
-                  description="Report a bug to the creator/dev(s)")
+                  description="Report a bug to the creator/dev(s)",
+                  )
 @app_commands.describe(bug="The bug or error you want to report.")
 async def report(interaction: discord.Interaction, bug: str):
     dev = await bot.fetch_user(947551947735576627)
@@ -136,7 +139,8 @@ async def speak(interaction: discord.Interaction,
 
 @bot.tree.command(
     name="fight",
-    description="Fight people using ANY custom move (just for fun)")
+    description="Fight people using ANY custom move (just for fun)",
+    )
 @app_commands.describe(user="The user you want to attack",
                        attack="The attack you want to do")
 async def fight(interaction: discord.Interaction, user: Member, attack: str):
@@ -292,7 +296,8 @@ async def checkwarns(interaction: discord.Interaction, user: Member):
     
 
 @bot.tree.command(name="slap",
-                  description="Slap someone!")
+                  description="Slap someone!",
+                  )
 @app_commands.describe(user="The user who you want to slap.")
 @app_commands.choices(tool=[
     app_commands.Choice(name="Hand", value="Hand"),
