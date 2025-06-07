@@ -298,12 +298,12 @@ async def checkwarns(interaction: discord.Interaction, user: Member):
     app_commands.Choice(name="Hand", value="Hand"),
     app_commands.Choice(name="Fish", value="Fish"),
     app_commands.Choice(name="Sock", value="Sock")])
-async def slap(interaction:discord.interaction, user:Member, tool:app_commands.Choice[str]):
-   if tool.value == "Hand":
-       message = f"{user.mention}! {interaction.user.mention} slapped you! Are you going to fight back?"
-   elif tool.value in ["Fish", "Sock"]:
-       message = f"{user.mention}! {interaction.user.mention} slapped you with a {tool.value}! Will you retaliate?"
-   await interaction.response.send_message(message) 
+async def slap(interaction: discord.Interaction, user: Member, tool: app_commands.Choice[str]):
+    if tool.value == "Hand":
+        message = f"{user.mention}! {interaction.user.mention} slapped you! Are you going to fight back?"
+    elif tool.value in ["Fish", "Sock"]:
+        message = f"{user.mention}! {interaction.user.mention} slapped you with a {tool.value}! Will you retaliate?"
+    await interaction.response.send_message(message) 
        
 
 
