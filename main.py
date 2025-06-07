@@ -289,6 +289,22 @@ async def checkwarns(interaction: discord.Interaction, user: Member):
     warnings = len(warns[user_id])
     await interaction.response.send_message(
         f"{user.mention} has {warnings} warning(s).", ephemeral=True)
+    
+
+@bot.tree.command(name="slap",
+                  description="Slap someone!")
+@app_commands.describe(user="The user who you want to slap.")
+@app_commands.choices(tool=[
+    app_commands.Choice(name="Hand", value="Hand"),
+    app_commands.Choice(name="Fish", value="Fish"),
+    app_commands.Choice(name="Sock", value="Sock")])
+async def slap(interaction:discord.interaction, user:Member, tool:app_commands.Choice[str]):
+   if tool.value == "Hand":
+       message = f"{user.mention}! {interaction.user.mention} slapped you! Are you going to fight back?"
+   elif tool.value in ["Fish", "Sock"]:
+       message = f"{user.mention}! {interaction.user.mention} slapped you with a {tool.value}! Will you retaliate?"
+   await interaction.response.send_message(message) 
+       
 
 
 @bot.event
