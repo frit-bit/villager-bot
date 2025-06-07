@@ -277,7 +277,7 @@ async def checkwarns(interaction: discord.Interaction, user: Member):
 
     if not is_authorized:
         await interaction.response.send_message(
-            f"Nice try, {interaction.user.mention}, but you don't have permission to use this                command.",
+            f"Nice try, {interaction.user.mention}, but you don't have permission to use this command.",
             ephemeral=True)
         return
 
