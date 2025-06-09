@@ -205,7 +205,7 @@ async def eightball(interaction: discord.Interaction, question: str):
     await interaction.response.send_message(embed=embed)
 
 
-@bot.tree.command(name="warn", description="Warn a user")
+@bot.tree.command(name="warn", description="Warn a user (Timeouts: 2x = 1d, 3x = 3d, 4x = 1w, and Bans: 5x = Ban)")
 @app_commands.describe(user="The user you want to warn",
                        reason="The reason for the warn")
 async def warn(interaction: discord.Interaction,
