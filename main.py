@@ -30,20 +30,28 @@ def prune_old_warns(user_id):
 
 
 class Villager(commands.Bot):
-
     def __init__(self):
         intents = discord.Intents.all()
-        super().__init__(command_prefix='!',
-                         intents=intents,
-                         dm_help=True)
+        self.is_syncing = False
+        super().__init__(
+            command_prefix='!',
+            intents=intents,
+            dm_help=True,
+            owner_id=947551947735576627
+        )
 
     async def setup_hook(self):
         try:
+            print("🔄 Syncing commands...")
+            self.is_syncing = True  # Set flag when sync starts
+            await asyncio.sleep(1)
             self.tree.default_permissions = None
             synced = await self.tree.sync()
-            print(f"Synced {len(synced)} command(s)")
+            print(f"✅ Successfully synced {len(synced)} command(s)")
+            self.is_syncing = False  # Set flag when sync completes
         except Exception as e:
-            print(f"Failed to sync commands: {e}")
+            print(f"❌ Failed to sync commands: {e}")
+            self.is_syncing = False  # Make sure to set flag even if sync fails
 
     async def on_ready(self):
         channel = self.get_channel(1366904232317550683)
@@ -156,7 +164,22 @@ async def fight(interaction: discord.Interaction, user: Member, attack: str):
 async def coinflip(interaction: discord.Interaction):
     await interaction.response.send_message(
         f"The coin landed on {random.choice(['heads', 'tails'])}.")
+    
 
+@bot.tree.command(name="choice", description="Make the bot pick one out of a list of choices! (Max 5)")
+@app_commands.describe(choice1="Choice 1",
+                       choice2="Choice 2",
+                       choice3="Choice 3",
+                       choice4="Choice 4",
+                       choice5="Choice 5")
+async def choice(interaction: discord.Interaction,
+                 choice1:str,
+                 choice2:str,
+                 choice3:str=None,
+                 choice4:str=None,
+                 choice5:str=None):
+    choices = [choice1, choice2, choice3, choice4, choice5]
+    await interaction.response.send_message(f"The bot has picked: {random.choice(choices)}")
 
 @bot.tree.command(name="8ball", description="Ask the 8ball a question")
 @app_commands.describe(question="The question you want to ask the 8ball")
@@ -169,7 +192,8 @@ async def eightball(interaction: discord.Interaction, question: str):
         "Better not tell you now.", "Cannot predict now.",
         "Concentrate and ask again.", "Don't count on it.", "My reply is no.",
         "My sources say no.", "Outlook not so good.", "Very doubtful.", "Absolutely not, you idiot.",
-        "Obviously.", "I don't want to answer this question.", "No.", "h̵̡̨̛̺̲͍̞͇̳̹̪̽̐̃̇̀́̽̋̀͐̈͌̋̚̕͜͜͝͝a̷̹̺̪͎̬͉̟̹͖̦͚̖̓̏̕ͅh̵̡̳̗̲̲͍̺̙͎͈͚̱͈̽̐͒̀̈́͑̊̕̕̚ͅä̷̢̧̛̛̻̺̫̻̭̙͔͇̯̖̮̩̱̻̲͈̎̋̍͛͊̈̈̀́̋͗̌̒͘ḩ̴̞̞͓̘̖̱͚̼̣͍̤̯̻̣͖̭͈̊̌͑̉̆͗̾͒ą̵̦̹̬̼̘̭͕͈͍̠̹̰̪̻̳̮͚̓̋̽̚̚h̵̯̰̤̤̝̜͔̥̝̙̳̰͈̭̤̗̹̓͊̒̆̒ͅͅa̸̟̮̒̀̀̃̈́̿͑͆͠ẖ̸̠̝̣̋̇́̂̋͗̈́͋̒͆̕͜ͅͅḁ̴̭̗̗͖̩̳͚͎̈́̑͛̉̾̀͒͊̃̒́̏̒͐͂̓͜h̵̹̠̝̽ä̸̢̡̨̡̛͈̹̝͈̭̺̟̤͇̳̹̼̦̝́̇̒̋̓̀͌̈́̿͂͒̊̾̑͆͘͝ḩ̷̞͖̿̽͘a̷̦͉̦̼̞̱͗̆́̈̓̈̿̀̕͘͠h̶̨̨̡̨̛̝̞̭̣̖̗͖͕̰̠̻͍̝͚͗̄̄͐̏̌̌͆̅̀̓̉̈́̕a̸̡̙̲̥̙̪̖̲̘̣͍͖̬̱̐́̂̐͑̀̈́͒͌̓͂̍̄̚̕͝h̷̰̯͉̻̝͓̥̙̞̆͌̔̾̐̐͆́͂̒̀ą̷͍͎̮͙͈̥̬̜͉̫͋͛̒̈́̆̾̂̚͠ḧ̵̡̢̨͈͇͍̹̣͚̮͕̫̮́̎̊̈́͊͒́̈́͛͛̆͐͊̉̑̚͠͝͠ā̷̢͈̯̮͇̫̯͉̯̤̼͔̼̲̞̰̍́͐̄̐̆̐͑̍͆̅͋͊̀͑̕̕h̴͉̜̤̞͔̗͛̑̄́̾͆͋͒̿̎̈́ȁ̴̦͍͉͙͈̬͕̯̼̻̙̱̬̰̎̀̉̂̄̓̓h̸̡̫͍̳̘̠̖̥̞̜̯̠̲͌́̂̇͝ḁ̷͉͊̌̇̏̑̇̾̂̓̔̄̂͂̋̚̕"
+        "Obviously.", "I don't want to answer this question.", "No.", "h̵̡̨̛̺̲͍̞͇̳̹̪̽̐̃̇̀́̽̋̀͐̈͌̋̚̕͜͜͝͝a̷̹̺̪͎̬͉̟̹͖̦͚̖̓̏̕ͅh̵̡̳̗̲̲͍̺̙͎͈͚̱͈̽̐͒̀̈́͑̊̕̕̚ͅä̷̢̧̛̛̻̺̫̻̭̙͔͇̯̖̮̩̱̻̲͈̎̋̍͛͊̈̈̀́̋͗̌̒͘ḩ̴̞̞͓̘̖̱͚̼̣͍̤̯̻̣͖̭͈̊̌͑̉̆͗̾͒ą̵̦̹̬̼̘̭͕͈͍̠̹̰̪̻̳̮͚̓̋̽̚̚h̵̯̰̤̤̝̜͔̥̝̙̳̰͈̭̤̗̹̓͊̒̆̒ͅͅa̸̟̮̒̀̀̃̈́̿͑͆͠ẖ̸̠̝̣̋̇́̂̋͗̈́͋̒͆̕͜ͅͅḁ̴̭̗̗͖̩̳͚͎̈́̑͛̉̾̀͒͊̃̒́̏̒͐͂̓͜h̵̹̠̝̽ä̸̢̡̨̡̛͈̹̝͈̭̺̤͇̳̹̼̦̝́̇̒̋̓̀͌̈́̿͂͒̊̾̑͆͘͟͝ḩ̷̞͖̿̽͘a̷̦͉̦̼̞̱͗̆́̈̓̈̿̀̕͘͠h̶̨̨̡̨̛̝̞̭̣̖̗͖͕̰̠̻͍̝͚͗̄̄͐̏̌̌͆̅̀̓̉̈́̕a̸̡̙̲̥̙̪̖̲̘̣͍͖̬̱̐́̂̐͑̀̈́͒͌̓͂̍̄̚̕͝h̷̰̯͉̻̝͓̥̙̞̆͌̔̾̐̐͆́͂̒̀ą̷͍͎̮͙͈̥̬̜͉̫͋͛̒̈́̆̾̂̚͠ḧ̵̡̢̨͈͇͍̹̣͚̮͕̫̮́̎̊̈́͊͒́̈́͛͛̆͐͊̉̑̚͠͝͠ā̷̢͈̯̮͇̫̯͉̯̤̼͔̼̲̞̰̍́͐̄̐̆̐͑̍͆̅͋͊̀͑̕̕h̴͉̜̤̞͔̗͛̑̄́̾͆͋͒̿̎̈́ȁ̴̦͍͉͙͈̬͕̯̼̻̙̱̬̰̎̀̉̂̄̓̓h̸̡̫͍̳̘̠̖̥̞̜̯̠̲͌́̂̇͝ḁ̷͉͊̌̇̏̑̇̾̂̓̔̄̂͂̋̚̕",
+        "You stupid gremlin, how do you not know this?"
     ]
     embed = discord.Embed(title="🎱 8ball 🎱", color=discord.Color.blue())
     embed.add_field(name="Question",
@@ -310,17 +334,42 @@ async def slap(interaction: discord.Interaction, user: Member, tool: app_command
         message = f"{user.mention}! {interaction.user.mention} slapped you with a {tool.value}! Will you retaliate?"
     await interaction.response.send_message(message) 
        
+@bot.command()
+@commands.is_owner()
+async def sync(ctx):
+    try:
+        print("🔄 Manual sync initiated...")
+        sync_msg = await ctx.send("🔄 Manual sync initiated, please wait...")
+        bot.is_syncing = True  # Set flag before loop
+        dots = 0
 
+        # Start loading animation
+        for _ in range(4):  # Show animation 4 times
+            dots = (dots + 1) % 4
+            await sync_msg.edit(content=f"🔄 Manual sync initiated. Please be patient, this could take a while{'.' * dots}")
+            await asyncio.sleep(0.75)
+            
+        # Perform the sync after animation
+        synced = await bot.tree.sync()
+        bot.is_syncing = False  # Reset flag
+        
+        print(f"✅ Synced {len(synced)} commands")
+        await sync_msg.edit(content=f"✅ Successfully synced {len(synced)} commands")
+    except Exception as e:
+        error_msg = f"❌ Failed to sync commands: {e}"
+        print(error_msg)
+        await ctx.send(error_msg, ephemeral=True)
+        bot.is_syncing = False  # Make sure to reset flag on error
 
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send(
-            "Nice try but you don't have permission to use this command.")
+            "Nice try but you don't have permission to use this command.", ephemeral=True)
     elif isinstance(error, commands.CommandNotFound):
-        await ctx.send("Command not found.")
+        await ctx.send("Command not found.", ephemeral=True)
     else:
-        await ctx.send("An error occurred.")
+        await ctx.send("An error occurred.", ephemeral=True)
         raise error
 
 
