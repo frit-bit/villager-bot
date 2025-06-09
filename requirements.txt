@@ -1,3 +1,2 @@
---index-url https://mirrors.aliyun.com/pypi/simple/
 discord.py>=2.3.2
 python-dotenv>=1.0.0
