@@ -330,7 +330,7 @@ async def sync(ctx):
         synced = await bot.tree.sync()
         bot.is_syncing = False
         print(f"✅ Synced {len(synced)} commands")
-        await sync_msg.edit(content=f"✅ Successfully synced {len(synced)} commands")
+        await sync_msg.edit(content=f"✅ Successfully synced {len(synced)} commands.")
     except Exception as e:
         error_msg = f"❌ Failed to sync commands: {e}"
         print(error_msg)
