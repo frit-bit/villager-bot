@@ -338,20 +338,22 @@ async def slap(interaction: discord.Interaction, user: Member, tool: app_command
 @bot.command()
 @commands.is_owner()
 async def sync(ctx):
-    try:
-        print("🔄 Manual sync initiated...")
+   try:
+        if not await bot.is_owner(ctx.author):
+            await ctx.send("❌ You must be the bot's owner to use this command!")
+            return
+
+        print("🔄 Manual sync initiated")
         sync_msg = await ctx.send("🔄 Manual sync initiated, please wait...")
-        while bot.is_syncing:
-            dots = 3
-            await sync_msg.edit(content=f"🔄 Manual sync initiated, please wait{'.'*dots}")
-        synced = await bot.tree.sync()
-        bot.is_syncing = False
-        print(f"✅ Synced {len(synced)} commands")
-        await sync_msg.edit(content=f"✅ Successfully synced {len(synced)} commands.")
-    except Exception as e:
-        error_msg = f"❌ Failed to sync commands: {e}"
-        print(error_msg)
-        await ctx.send(error_msg, ephemeral=True)
+        synced_commands = await bot.tree.sync()
+   
+        await sync_msg.edit(content=f"✅ Successfully synced {len(synced_commands)} commands.")
+        print(f"✅ Successfully synced {len(synced_commands)} commands.")
+
+   except Exception as e:
+        print(f"❌ Failed to sync commands: {e}") 
+        await ctx.send(f"❌ Failed to sync commands: {e}")
+
 
 @bot.event
 async def on_command_error(ctx, error):
