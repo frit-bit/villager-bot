@@ -189,6 +189,23 @@ async def eightball(interaction: discord.Interaction, question: str):
     await interaction.response.send_message(embed=embed)
 
 
+
+@bot.tree.command(name="choice", description="Make the bot pick one out of a list of choices! (Max 5)")
+@app_commands.describe(choice1="Choice 1",
+                       choice2="Choice 2",
+                       choice3="Choice 3",
+                       choice4="Choice 4",
+                       choice5="Choice 5")
+async def choice(interaction: discord.Interaction,
+                 choice1:str,
+                 choice2:str,
+                 choice3:str=None,
+                 choice4:str=None,
+                 choice5:str=None):
+    choices = [choice1, choice2, choice3, choice4, choice5]
+    await interaction.response.send_message(f"The bot has picked: {random.choice(choices)}")
+
+
 @bot.tree.command(name="warn", description="Warn a user")
 @app_commands.describe(user="The user you want to warn",
                        reason="The reason for the warn")
