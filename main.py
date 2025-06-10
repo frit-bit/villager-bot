@@ -137,10 +137,10 @@ async def speak(interaction: discord.Interaction,
     if channel:
         await interaction.response.defer(ephemeral=True)
         await channel.send(message)
-        await interaction.followup.send(f"✅ Sent message in {channel.mention}",
+        await interaction.followup.send(f"✅ Sent message ({message}) in {channel.mention}",
                                         ephemeral=True)
     else:
-        await interaction.response.send_message("✅ Sent message",
+        await interaction.response.send_message(f"✅ Sent message ({message})",
                                                 ephemeral=True)
         await interaction.channel.send(message)
 
